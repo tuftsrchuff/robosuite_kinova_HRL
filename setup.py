@@ -24,6 +24,7 @@ setup(
         "opencv-python",
         "pynput",
         "termcolor",
+        "gym<=0.21"
     ],
     eager_resources=["*"],
     include_package_data=True,
