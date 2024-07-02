@@ -7,7 +7,18 @@ from stable_baselines3 import SAC, PPO
 import traceback
 
 class Executor():
-	def __init__(self, id=1, policy=None, I=None, Beta=None, Circumstance=None, basic=False, hrl=False, verbose=False, high_env=None):
+	def __init__(self, 
+			  id=1, 
+			  policy=None, 
+			  I=None, 
+			  Beta=None, 
+			  Circumstance=None, 
+			  basic=False, 
+			  hrl=False, 
+			  verbose=False, 
+			  high_env=None,
+			  env=None, 
+			  low_env=None, ):
 		super().__init__()
 		self.id = id
 		self.policy = policy
@@ -19,13 +30,24 @@ class Executor():
 		self.verbose = verbose
 		self.verboseprint = print if verbose else lambda *a, **k: None
 		self.high_env = high_env
+		self.env = env
+		self.low_env = low_env
 
 	def path_to_json(self):
 		return {self.id:self.policy}
 	
-	#Is this the best way to pass in a lot of args?
-	def execute_policy(self, executors=None, executor=None, detector=None, env=None, low_env=None, plan=None,
-					planID=0, effects=None, old_state=None, obs=None, step_executor=None):
+	#Executors should be globally defined, in detector function or executor object initialization?
+	#executors=None, 
+	#executor=None,
+	#step_executor=None
+	def execute_policy(self,  
+					detector=None,
+					plan=None,
+					planID=0, 
+					effects=None, 
+					old_state=None, 
+					obs=None
+					):
 		'''
 			This function executes the plan on the domain step by step
 			### I/P: all domain specific info including dict of executors, executor to execute,
@@ -38,6 +60,9 @@ class Executor():
 		info = None
 		step_per_sub = 10
 		steps_taken = 0
+
+		#Was passed in, now initialized as 0 here
+		step_executor = 0
 		try:
 			# executor execution
 
@@ -46,16 +71,16 @@ class Executor():
 			if executors[executor].hrl:
 				if self.high_env == None:
 					return obs, rew_eps, done, info
-				model = PPO.load(executors[executor].policy, env=env)
+				model = PPO.load(executors[executor].policy, env=self.env)
 				#self.hrl_env.overwrite_executor_id(executor)
-				env.overwrite_executor_id(executor)
-				exec_env = env
+				self.env.overwrite_executor_id(executor)
+				exec_env = self.env
 				#exec_env.overwrite_executor_id(executor)
 				print("HRL EXECUTOR")
 			else:
-				model = SAC.load(executors[executor].policy, env=low_env, 
-					 custom_objects={"observation_space":low_env.observation_space, "action_space":low_env.action_space})
-				exec_env = low_env
+				model = SAC.load(executors[executor].policy, env=self.low_env, 
+					 custom_objects={"observation_space":self.low_env.observation_space, "action_space":self.low_env.action_space})
+				exec_env = self.low_env
 			
 			#Beta needs operator and env passed into it, where are those?
 			#Removed and self.Beta() != True and and steps_taken <= step_per_sub
@@ -67,14 +92,16 @@ class Executor():
 				#Why is this different for hrl vs low-level policy?
 				step_executor += 10 if executors[executor].hrl else 1
 				rew_eps += reward
-				done = executors[executor].Beta(operator=plan[planID], env=low_env)
-				if step_executor > 1000 or info['collision']:
+				done = executors[executor].Beta(operator=plan[planID], env=self.low_env)
+
+				#or info['collision']
+				if step_executor > 1000:
 					done = True
 				steps_taken += 1
 
 			print("Comparing effects")
 			# comparing execution effects to expected effects
-			new_state = detector(low_env)
+			new_state = detector(self.low_env)
 			expected_effects = effects(plan[planID])
 
 			#Compare looks at all predicates in new state and checks if it exists in grounded

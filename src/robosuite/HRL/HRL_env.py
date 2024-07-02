@@ -10,7 +10,7 @@ import time
 
 #TODO: proper file paths for domain synapses imports
 
-class HRL_FollowLane(gym.Env): # pylint: disable=too-many-instance-attributes
+class HRL_Env(gym.Env): # pylint: disable=too-many-instance-attributes
 	"""
 	Gym environment, where the agent has to control both steering and throttle such that that
 	the car stays within the lane and holds the target velocity.
@@ -18,11 +18,16 @@ class HRL_FollowLane(gym.Env): # pylint: disable=too-many-instance-attributes
 	If neither straight nor left is possible, car is supposed to stand still.
 	"""
 
-	def __init__(self, env, high_env=None, params=None, runtime_settings=None, verbose=False, novelty_pattern=None, executor_id=None):
-		# print("HRL Follow initialized...")
+	def __init__(self, 
+			  env, 
+			  high_env=None, 
+			  params=None, 
+			  runtime_settings=None, 
+			  verbose=False, 
+			  novelty_pattern=None, 
+			  executor_id=None,
+			  action_space=None):
 
-
-		# time.sleep(15)
 		self.low_env = env
 		self.high_env = high_env
 		self.novelty_pattern = novelty_pattern
@@ -31,10 +36,10 @@ class HRL_FollowLane(gym.Env): # pylint: disable=too-many-instance-attributes
 
 		self.verbose = verbose
 		self.verboseprint = print if verbose else lambda *a, **k: None
-		self.verboseprint("\n\n---------------------------- RUNNING AN HRL_FollowLane INSTANCE. --------------------------\n-")
+		self.verboseprint("\n\n---------------------------- RUNNING AN HRL INSTANCE. --------------------------\n-")
 
 		# TODO: Need to make this a variable passed in
-		self.action_space = spaces.Discrete(3)
+		self.action_space = action_space
 
 
 
@@ -49,8 +54,6 @@ class HRL_FollowLane(gym.Env): # pylint: disable=too-many-instance-attributes
 
 	def step(self, action):
 		print("In HRL step")
-		# print(traceback.print_stack())
-		time.sleep(15)
 
 		done = False
 		info = {}

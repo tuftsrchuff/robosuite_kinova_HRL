@@ -5,9 +5,10 @@
 # the pattern is assumed and is not studied in the paper.)
 
 '''
+import copy
 
+from stable_baselines3.sac.policies import MlpPolicy
 from stable_baselines3 import SAC
-from stable_baselines3 import PPO
 
 from params import *
 from planner import *
@@ -15,7 +16,10 @@ import domain_synapses
 from domain_synapses import *
 
 import gym
+import gym_carla_novelty
 from gym_carla_novelty.novelties.novelty_wrapper import NoveltyWrapper
+from gym_carla_novelty.operator_learners.sb3_eval import FixedSeedEvalCallback
+
 from gym_carla_novelty.operator_learners.train import train
 
 from executor import Executor
@@ -24,31 +28,28 @@ from state import *
 from carla	import *
 from novelties import *
 
+from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 set_random_seed(0, using_cuda=True)
 
+# HER parameters
+#from stable_baselines3 import HerReplayBuffer, DQN, PPO
+#from stable_baselines3.her.goal_selection_strategy import GoalSelectionStrategy
+# Available strategies (cf paper): future, final, episode
+#goal_selection_strategy = 'future' # equivalent to GoalSelectionStrategy.FUTURE
+# If True the HER transitions will get sampled online
+#online_sampling = True
+
 from gym_carla_novelty.operator_learners.training_wrapper import TrainingWrapper
+import traceback
+import time
 
 
 class Learner:
-	def __init__(self, 
-			  steps_num, 
-			  test, 
-			  seed, 
-			  transfer, 
-			  failed_operator, 
-			  failure_state, 
-			  novelty_pattern, 
-			  novelty_id, 
-			  env_config, 
-			  settings, 
-			  eval_settings, 
-			  verbose, 
-			  data_folder="", 
-			  use_basic_policies=True,
-			  hrl=False,
-			  env=None) -> None:
+	def __init__(self, steps_num, test, seed, transfer, failed_operator, failure_state, novelty_pattern, novelty_id, env_config, settings, eval_settings, verbose, data_folder="", use_basic_policies=True) -> None:
 		print("Learner initialized...")
+		print(traceback.print_stack())
+		# time.sleep(5)
 		self.reload_synapses()
 
 		self.test = test
@@ -56,16 +57,9 @@ class Learner:
 		self.flag = False
 
 		self.failed_operator = failed_operator.split(" ")[0]
-		
-        #Modifying creation of environments
-        if hrl == True:
-            print("\nCreating lower level eval env.")
-			#This will fail if gym environments not set up?
-		    eval_env = gym.make(low_env_id, runtime_settings=eval_settings, params=env_config, verbose=verbose)
-        else:
-            env_id = training_env[self.failed_operator]
-            print("\nCreating eval env.")
-            eval_env = gym.make(env_id, runtime_settings=eval_settings, params=env_config, verbose=verbose)
+		env_id = training_env[self.failed_operator]
+		print("\nCreating eval env.")
+		eval_env = gym.make(env_id, runtime_settings=eval_settings, params=env_config, verbose=verbose)
 
 		self.queue_number = '_' + str(len(applicator[self.failed_operator]))
 

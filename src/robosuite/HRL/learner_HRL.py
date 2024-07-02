@@ -34,11 +34,23 @@ import traceback
 import time
 
 class Learner_HRL:
-	def __init__(self, steps_num, test, seed, transfer, failed_operator, failure_state, novelty_pattern, novelty_id, env_config, settings, eval_settings, verbose, data_folder="", use_basic_policies=True) -> None:
+	def __init__(self, 
+			  steps_num, 
+			  test, 
+			  seed, 
+			  transfer, 
+			  failed_operator, 
+			  failure_state, 
+			  novelty_pattern, 
+			  novelty_id, 
+			  env_config, 
+			  settings, 
+			  eval_settings, 
+			  verbose, 
+			  data_folder="", 
+			  use_basic_policies=True) -> None:
 
-		print("Learner HRL initialized...")
-		# print(traceback.print_stack())
-		# time.sleep(5)
+		print("Learner initialized...")
 		self.reload_synapses()
 
 		self.test = test
