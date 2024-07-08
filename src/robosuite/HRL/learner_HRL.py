@@ -12,8 +12,8 @@ from stable_baselines3 import PPO
 
 from params import *
 from planner import *
-import domain_synapses
-from domain_synapses import *
+import robosuite.HRL_domain.domain_synapses as domain_synapses
+from robosuite.HRL_domain.domain_synapses import *
 
 import gym
 import gym_carla_novelty

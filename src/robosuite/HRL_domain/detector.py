@@ -202,6 +202,7 @@ class Robosuite_Hanoi_Detector:
                     picked_up_value = float(picked_up_value)
                 groundings[f'picked_up({obj})'] = picked_up_value
 
+            #Key is grounded predicate and value is evaluation of predicate (True/False/numerical)
             return dict(sorted(groundings.items())) if as_dict else np.asarray([v for k, v in sorted(groundings.items())])
     
     def dict_to_array(self, groundings):

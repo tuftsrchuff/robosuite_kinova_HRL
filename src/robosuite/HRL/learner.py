@@ -1,9 +1,11 @@
 '''
 # This file is the learner of RAPidL.
-# This file launches a learning instance, which builds an MDP on the fly and learns to accomodate a novelty, i.e. a performant enough RL policy, with a termination condition
-# beta generated from higher level information and transfer knowledge based on some pattern information (here only the label of the novelty, the detection and charaterization of
+# This file launches a learning instance, which builds an MDP on the fly and 
+# learns to accomodate a novelty, i.e. a performant enough RL policy, with 
+# a termination condition beta generated from higher level information and 
+# transfer knowledge based on some pattern information (here only the label 
+# of the novelty, the detection and charaterization of
 # the pattern is assumed and is not studied in the paper.)
-
 '''
 
 from stable_baselines3 import SAC
@@ -11,8 +13,9 @@ from stable_baselines3 import PPO
 
 from params import *
 from planner import *
-import domain_synapses
-from domain_synapses import *
+import robosuite.HRL_domain.domain_synapses as domain_synapses
+from robosuite.HRL_domain.domain_synapses import *
+from robosuite.HRL.HRL_env import HRL_Env
 
 import gym
 from gym_carla_novelty.novelties.novelty_wrapper import NoveltyWrapper
@@ -37,17 +40,23 @@ class Learner:
 			  seed, 
 			  transfer, 
 			  failed_operator, 
+			  #Failure state should be reset state
 			  failure_state, 
 			  novelty_pattern, 
+			  #Can refer to novelty pattern based on ID?
 			  novelty_id, 
-			  env_config, 
+			  #**args - contains all environment specific details
+			  #			  env_config, 
 			  settings, 
 			  eval_settings, 
 			  verbose, 
 			  data_folder="", 
 			  use_basic_policies=True,
 			  hrl=False,
-			  env=None) -> None:
+			  env_id=None,
+			  **kwargs, #This passes in the rest as key-vals in dictionary
+			  *args #This passes in the rest of the args as only values as an array
+			  ) -> None:
 		print("Learner initialized...")
 		self.reload_synapses()
 
@@ -56,67 +65,39 @@ class Learner:
 		self.flag = False
 
 		self.failed_operator = failed_operator.split(" ")[0]
+
+		#env_id mapping still needs to be worked out in create_env function
+		print("\nCreating eval env.")
+		eval_env = create_env(env_id)
+
+		print("Creating training env.")
+		training_env = create_env(env_id)
+
+
+
+
 		
         #Modifying creation of environments
-        if hrl == True:
-            print("\nCreating lower level eval env.")
-			#This will fail if gym environments not set up?
-		    eval_env = gym.make(low_env_id, runtime_settings=eval_settings, params=env_config, verbose=verbose)
-        else:
-            env_id = training_env[self.failed_operator]
-            print("\nCreating eval env.")
-            eval_env = gym.make(env_id, runtime_settings=eval_settings, params=env_config, verbose=verbose)
+		if hrl == True:
+			print("\nWrapping training and evaluation in HRL env...")
+			eval_env = HRL_Env(eval_env)
+			training_env = HRL_Env(training_env)
 
+			
 		self.queue_number = '_' + str(len(applicator[self.failed_operator]))
 
+		#How do we want to handle the reset location? Somehow specify in the detector function?
+		#dictionary representing symbolic state, feed to generate env function
+		#
 		for predicate in failure_state.grounded_predicates:
 			if predicate[0] == "at":
 				self.reset_loc = predicate[2]
 			elif predicate[0] == "dir":
 				self.reset_dir = predicate[1]
 		
-		print("Creating training env.")
+		#Need to call again a new environment here for eval vs training
 		env = gym.make(env_id, runtime_settings=settings, params=env_config, verbose=verbose)
 		env = TrainingWrapper(env)
-
-		if novelty_id is not None:
-			if 'obstacle' in novelty_id:
-				self.reset_loc = "l2"
-				self.reset_dir = "e"
-				self.flag = True
-				# Need to train on the whole state space
-				# for HER or in case we want to terminate the training earlier (when reaching a high level goal)
-				#env = NoveltyWrapper(env, loc="l2", direction="s", goal_function=self.DesiredGoal_generator)
-				#eval_env = NoveltyWrapper(eval_env, loc="l2", direction="s", goal_function=self.DesiredGoal_generator)
-				print("Training from fixed initial state: reset_loc={}, reset_dir={}".format(self.reset_loc, self.reset_dir))
-				env = NoveltyWrapper(env, loc=self.reset_loc, direction=self.reset_dir)
-				eval_env = NoveltyWrapper(eval_env, loc=self.reset_loc, direction=self.reset_dir)
-				self.training_steps = int(self.steps_num/3)
-				self.eval_freq = int(self.steps_num/(3*5))
-
-			elif len(novelty_id) > 1 or novelties_info[novelty_id[0]]["type"] == "global":
-				# Need to train on the whole state space
-				# for HER or in case we want to terminate the training earlier (when reaching a high level goal)
-				#env = NoveltyWrapper(env, loc="l2", direction="s", goal_function=self.DesiredGoal_generator)
-				#eval_env = NoveltyWrapper(eval_env, loc="l2", direction="s", goal_function=self.DesiredGoal_generator)
-				print("Training from random initial state: reset_loc={}, reset_dir={}".format(self.reset_loc, self.reset_dir))
-				env = NoveltyWrapper(env)
-				eval_env = NoveltyWrapper(eval_env)
-				self.training_steps = int(self.steps_num/3)
-				self.eval_freq = int(self.steps_num/(3*5))
-			elif novelties_info[novelty_id[0]]["type"] == "local":
-				# Need to train only from the failure state
-				#desired_effects = effects(self.failed_operator)
-				#desired_effects = self.DesiredGoal_generator(self.failure_env, self.failed_operator, state=failure_state)
-				#env = NoveltyWrapper(env, loc=self.reset_loc, direction=self.reset_dir, high_goal=desired_effects)
-				#eval_env = NoveltyWrapper(eval_env, loc=self.reset_loc, direction=self.reset_dir, high_goal=desired_effects)
-				#eval_env = NoveltyWrapper(eval_env, loc="l2", direction="s", high_goal=desired_effects)
-				env = NoveltyWrapper(env, loc=self.reset_loc, direction=self.reset_dir)
-				eval_env = NoveltyWrapper(eval_env, loc="l2", direction="s")
-				self.training_steps = self.steps_num * 2
-				self.eval_freq = int(self.steps_num * 2/5)
-				#print("desired effects: ", desired_effects)
-				print("Starting learning, reseting on reset_loc={}, and reset_dir={}".format(self.reset_loc, self.reset_dir))
 
 		if novelty_id is not None:
 			novelties = []
@@ -184,21 +165,6 @@ class Learner:
 	def select_source_policy(self, novelty_pattern, transfer, use_basic_policies):
 		# Handling policy source RL transfer - Source policy transfer strategy
 		if transfer and novelty_pattern is not None: # if the agent charaterizes some information about the novelty
-			"""
-			if len(novelty_pattern) > 1:
-				# if many novelties detected, then transfer from the last policy that learned to execute the failed operator
-				return executors[applicator[self.failed_operator][-1]].policy
-			elif novelties_info[novelty_pattern[0]]["type"] == "global":
-				# tranfer from a policy that accomodated a novelty with a similar pattern as the current novelty
-				source = select_closest_pattern(novelty_pattern, self.failed_operator.split(' ')[0])
-				if source != None:
-					return executors[source].policy 
-				# if the agent has not yet faced such novelty pattern, then transfer from the last policy that learned to execute the failed operator
-				return executors[applicator[self.failed_operator][-1]].policy
-			elif novelties_info[novelty_pattern[0]]["type"] == "local":
-				# transfer from the last policy that learned to execute the failed operator
-				return executors[applicator[self.failed_operator][-1]].policy
-			"""
 			source = select_closest_pattern(novelty_pattern, self.failed_operator.split(' ')[0], same_operator=True, use_base_policies=use_basic_policies)
 			if source != None:
 				print("Transferring from source policy: {}, trained on {}.".format(source, novelty_patterns[source]))
@@ -251,25 +217,8 @@ class Learner:
 		return True
 
 	def abstract_to_executor(self):
-		#self.model.save("gym_carla_novelty/policies/" + self.name)
 		applicator[self.failed_operator].append(self.name)
-		#executor = Executor(id=self.name, policy=f"{self.folder}models/{self.name}", Beta=beta_indicator) 
-		if self.flag:
-			executor = Executor(id=self.name, policy=f"{self.policy_folder}/best_model", Beta=beta_indicator, I=[[["at","car","l2"],["dir","e"]],[["at","car","l3"],["dir","e"]]])
-		else:
-			executor = Executor(id=self.name, policy=f"{self.policy_folder}/best_model", Beta=beta_indicator)
+		executor = Executor(id=self.name, policy=f"{self.policy_folder}/best_model", Beta=beta_indicator, I=[[["at","car","l2"],["dir","e"]],[["at","car","l3"],["dir","e"]]])
 		ex_dict = {self.name:executor}
 		executors.update(ex_dict)
 		executors_id_list.append(self.name)
-
-
-
-	"""		
-	# in the init function
-	def beta_indicator(desired_effects):
-		# use planner to map initial state to desired effects
-		def success_func(env):
-			from state import State
-			state = detector(env)
-			return desired_effects in state.grounded_predicates
-		return success_func"""

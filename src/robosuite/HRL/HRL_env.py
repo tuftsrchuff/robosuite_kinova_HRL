@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 from gym import spaces
-from domain_synapses import *
+from robosuite.HRL_domain.domain_synapses import *
 
 from stable_baselines3.sac.policies import MlpPolicy
 from stable_baselines3 import SAC, PPO
