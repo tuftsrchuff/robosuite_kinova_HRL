@@ -1,10 +1,10 @@
 
 '''
 # This files implements the structure of the executor object used to execute the hierarchical policies
-
 '''
 from stable_baselines3 import SAC, PPO
 import traceback
+from HRL_domain.domain_synapses import *
 
 class Executor():
 	def __init__(self, 
@@ -12,14 +12,13 @@ class Executor():
 			  policy=None, 
 			  I=None, 
 			  Beta=None, 
-			  Circumstance=None, 
-			  basic=False, 
+			  Circumstance=None, #What is circumstance?
+			  basic=False, #What is basic?
 			  hrl=False, 
 			  verbose=False, 
 			  high_env=None,
 			  env=None, 
 			  low_env=None, ):
-		super().__init__()
 		self.id = id
 		self.policy = policy
 		self.I = I
@@ -84,7 +83,6 @@ class Executor():
 			
 			#Beta needs operator and env passed into it, where are those?
 			#Removed and self.Beta() != True and and steps_taken <= step_per_sub
-			#Can 
 			while not done:
 				action, _states = model.predict(obs)
 				obs, reward, done, info = exec_env.step(action)

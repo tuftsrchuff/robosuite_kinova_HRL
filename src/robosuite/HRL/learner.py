@@ -14,8 +14,8 @@ from stable_baselines3 import PPO
 from params import *
 from planner import *
 import robosuite.HRL_domain.domain_synapses as domain_synapses
-from robosuite.HRL_domain.domain_synapses import *
-from robosuite.HRL.HRL_env import HRL_Env
+from HRL_domain.domain_synapses import *
+from HRL.HRL_env import HRL_Env
 
 import gym
 from gym_carla_novelty.novelties.novelty_wrapper import NoveltyWrapper
@@ -63,6 +63,7 @@ class Learner:
 		self.test = test
 		self.steps_num = steps_num
 		self.flag = False
+		self.hrl = hrl
 
 		self.failed_operator = failed_operator.split(" ")[0]
 
@@ -73,12 +74,14 @@ class Learner:
 		print("Creating training env.")
 		training_env = create_env(env_id)
 
+		#Does training need a training wrapper like in learner_HRL?
+
 
 
 
 		
         #Modifying creation of environments
-		if hrl == True:
+		if self.hrl == True:
 			print("\nWrapping training and evaluation in HRL env...")
 			eval_env = HRL_Env(eval_env)
 			training_env = HRL_Env(training_env)
@@ -88,36 +91,35 @@ class Learner:
 
 		#How do we want to handle the reset location? Somehow specify in the detector function?
 		#dictionary representing symbolic state, feed to generate env function
-		#
 		for predicate in failure_state.grounded_predicates:
 			if predicate[0] == "at":
 				self.reset_loc = predicate[2]
 			elif predicate[0] == "dir":
 				self.reset_dir = predicate[1]
-		
-		#Need to call again a new environment here for eval vs training
-		env = gym.make(env_id, runtime_settings=settings, params=env_config, verbose=verbose)
-		env = TrainingWrapper(env)
 
 		if novelty_id is not None:
 			novelties = []
 			novelties_eval = []
 			for novelty in novelty_id:
 				print("\033[1m" + "\n\n\t===> Injecting Novelty: {} <===\n\n".format(novelty) + "\033[0m")
+				
+				#TODO: Create novelties_info (domain_synapses?) with novelty information
 				novel_wrapper = novelties_info[novelty]["wrapper"]
 				novel_params = novelties_info[novelty]["params"]
 				if novel_params is None:
 					novel_params = {}
-				novelties.append(novel_wrapper(env=env, **novel_params))
+				novelties.append(novel_wrapper(env=training_env, **novel_params))
 				novelties_eval.append(novel_wrapper(env=eval_env, **novel_params))
-			env.set_novelties(novelties)
+			training_env.set_novelties(novelties)
 			eval_env.set_novelties(novelties_eval)
 		
-		env.seed(seed)
+		training_env.seed(seed)
 		eval_env.seed(seed)
 
-		self.env = env
+		self.env = training_env
 		self.eval_env = eval_env
+
+		#TODO: If HRL env then need to create loop environment and eval loop env
 
 		self.name = failed_operator.split(' ')[0] + self.queue_number
 		self.folder = data_folder + self.name + '/'
@@ -132,13 +134,14 @@ class Learner:
 		if self.learned:
 			self.abstract_to_executor()	
 			novelty_patterns.update({self.name:novelty_pattern})
-		self.env.close()
-		print("Closing training env.")
+		
 		try:
+			self.env.close()
+			print("Closing training env.")
 			self.eval_env.close()
 			print("Closing eval env.")
 		except:
-			pass
+			print("Could not close environment")
 
 	def reload_synapses(self):
 		global applicator 
@@ -173,14 +176,23 @@ class Learner:
 		return None
 
 	def learn_policy(self, source_policy):
-		if source_policy == None:
-			policy_kwargs = dict(net_arch=dict(pi=[256, 256, 256], qf=[256, 256, 256]))
-			model = SAC("MlpPolicy", self.env, verbose=1, gamma=0.95, learning_rate=0.0003, policy_kwargs=policy_kwargs, tensorboard_log=self.tensorboard_folder+self.name, device="cuda")
+		if self.hrl == True:
+			if source_policy == None:
+				policy_kwargs = dict(net_arch=dict(pi=[256, 256, 256], qf=[256, 256, 256]))
+				model = SAC("MlpPolicy", self.env, verbose=1, gamma=0.95, learning_rate=0.0003, policy_kwargs=policy_kwargs, tensorboard_log=self.tensorboard_folder+self.name, device="cuda")
+			else:
+				model = SAC.load(source_policy, env=self.env, tensorboard_log=self.tensorboard_folder, device="cuda") 
+				model.set_env(self.env)
+				parameters = model.get_parameters()
+				model.set_parameters(parameters)
 		else:
-			model = SAC.load(source_policy, env=self.env, tensorboard_log=self.tensorboard_folder, device="cuda") 
-			model.set_env(self.env)
-			parameters = model.get_parameters()
-			model.set_parameters(parameters)
+			if source_policy == None:
+				model = PPO("MlpPolicy", self.env, verbose=1, tensorboard_log=self.tensorboard_folder+self.name, device="cuda")
+			else:
+				model = PPO.load(source_policy, env=self.env, tensorboard_log=self.tensorboard_folder, device="cuda") 
+				model.set_env(self.env)
+				parameters = model.get_parameters()
+				model.set_parameters(parameters)
 
 		policy_kwargs = dict(net_arch=dict(pi=[256, 256, 256], qf=[256, 256, 256]))
 		if self.test:
@@ -213,10 +225,9 @@ class Learner:
 				run_id=self.name)
 
 		self.model = model
-		#self.model.save(f"{self.folder}models/{self.name}")
 		return True
 
-	def abstract_to_executor(self):
+	def abstract_to_executor(self): 
 		applicator[self.failed_operator].append(self.name)
 		executor = Executor(id=self.name, policy=f"{self.policy_folder}/best_model", Beta=beta_indicator, I=[[["at","car","l2"],["dir","e"]],[["at","car","l3"],["dir","e"]]])
 		ex_dict = {self.name:executor}

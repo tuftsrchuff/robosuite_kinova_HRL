@@ -1,6 +1,5 @@
-import warnings
 import robosuite as suite
-
+from HRL_domain.joint_friction import JointNovelty
 def create_env(env_id, render=False, seed=None):
     '''
     This method is responsible for generating a new environment for the experiment. It takes an environment ID, a list of novelties, 
@@ -27,3 +26,62 @@ def create_env(env_id, render=False, seed=None):
     )
 
     return env
+
+
+
+# set up executor classes
+executors = dict()
+
+
+# domain dependant ids of executors
+executors_id_list = ['follow_lane','turn_left','turn_right','change_lane_left','change_lane_right','break','pick_up','drop','park']
+
+# used to select source policy to transfer from whenever the agent needs to train on a novelty pattern
+novelty_patterns = {'follow_lane':[],'turn_left':[],'turn_right':[],'break':[],'park':[],'change_lane_left':[],'change_lane_right':[]}
+
+# set up applicator mapping from operators to executors
+applicator = {'goForward':['follow_lane'],
+		'turnLeft':['turn_left'],
+		'turnRight':['turn_right'],
+		'ChangeLaneLeft':['change_lane_left'],
+		'ChangeLaneRight':['change_lane_right'],
+		'Break':['break'],
+		'PickUp':['pick_up'],
+		'Drop':['drop'],
+		'Park':['park']
+		}
+
+
+novelties_info = {
+    "joint_friction": {"wrapper":JointNovelty, "params": None, "type":"global"}
+}
+
+
+def setupExecutors():
+    #TODO: Figure out how to populate the executors, should be list of policies that have I, beta, path, etc
+    #Populate dictionary with executor name as key, 
+    #executors_id_list = ['follow_lane','turn_left','turn_right','change_lane_left','change_lane_right','break','pick_up','drop','park']
+
+
+    #From brain.py in reload_synapses line 240
+    # executors_id_list = domain_synapses.executors_id_list
+    # novelty_patterns = domain_synapses.novelty_patterns
+    # applicator = domain_synapses.applicator
+    # executors = domain_synapses.executors
+    pass
+
+
+def load_infos():
+    #TODO: Loads executor data from existing trained polices and novelties
+    pass
+
+
+
+def select_closest_pattern(novelty_list, operator, same_operator=False, use_base_policies=True, hrl=False):
+	pass
+
+def select_best_executor(novelty_list, queue, state, executor_id=None, skill_selection=True):
+	pass
+
+def I_in_state(I, state):
+	pass

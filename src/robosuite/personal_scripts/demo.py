@@ -1,5 +1,6 @@
 import numpy as np
 import robosuite as suite
+from robosuite.utils.mjmod import DynamicsModder
 
 # create environment instance
 env = suite.make(
@@ -17,10 +18,22 @@ env.reset()
 
 action = np.random.randn(env.robots[0].dof) # sample random action
 obs, reward, done, info = env.step(action)  # take action in the environment
-print(obs)
 print(reward)
 
-for i in range(1000):
+for i in range(100):
     action = np.random.randn(env.robots[0].dof) # sample random action
     obs, reward, done, info = env.step(action)  # take action in the environment
     env.render()  # render on display
+
+# env.robots[0].set_joint_attribute("friction loss", np.ones(len(env.robots[0].joint_indexes)))
+# print("Manually setting friction")
+
+# modder = DynamicsModder(sim=env.sim, random_state=np.random.RandomState(5))
+# modder.mod(geom_name, "friction", [2.0, 0.2, 0.04])  
+
+# modder.update()                                                   # make sure the changes propagate in sim
+
+# for i in range(100):
+#     action = np.random.randn(env.robots[0].dof) # sample random action
+#     obs, reward, done, info = env.step(action)  # take action in the environment
+#     env.render()  # render on display

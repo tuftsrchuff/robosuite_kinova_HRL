@@ -8,9 +8,7 @@ from stable_baselines3 import SAC, PPO
 import traceback
 import time
 
-#TODO: proper file paths for domain synapses imports
-
-class HRL_Env(gym.Env): # pylint: disable=too-many-instance-attributes
+class HRL_Env(gym.Env):
 	"""
 	Gym environment, where the agent has to control both steering and throttle such that that
 	the car stays within the lane and holds the target velocity.
@@ -38,7 +36,6 @@ class HRL_Env(gym.Env): # pylint: disable=too-many-instance-attributes
 		self.verboseprint = print if verbose else lambda *a, **k: None
 		self.verboseprint("\n\n---------------------------- RUNNING AN HRL INSTANCE. --------------------------\n-")
 
-		# TODO: Need to make this a variable passed in
 		self.action_space = action_space
 
 
