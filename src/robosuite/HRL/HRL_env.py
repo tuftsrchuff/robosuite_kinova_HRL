@@ -2,6 +2,7 @@ import gym
 import numpy as np
 from gym import spaces
 from robosuite.HRL_domain.domain_synapses import *
+from robosuite.HRL_domain.detector import Detector
 
 from stable_baselines3.sac.policies import MlpPolicy
 from stable_baselines3 import SAC, PPO
@@ -60,7 +61,10 @@ class HRL_Env(gym.Env):
 		executor_queue = applicator[list(applicator)[action]]
 		print(f"Executor queue {executor_queue}")
 		#self.verboseprint('The HRL action is the operator: ', list(applicator)[action])
-		state = detector(self.low_env)
+		state_detector = Detector(self.low_env)
+
+		#Should this be a dictionary or array?
+		state = state_detector.get_state(as_dict=False)
 
 		#print("HRL EXEC ID: ", self.executor_id)
 		executor = select_best_executor(self.novelty_pattern, executor_queue, state, self.executor_id, skill_selection=False)

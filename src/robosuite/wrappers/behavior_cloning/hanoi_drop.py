@@ -2,7 +2,7 @@ import copy
 import gymnasium as gym
 import robosuite as suite
 import numpy as np
-from detector import Robosuite_Hanoi_Detector
+from robosuite.HRL_domain.detector import Detector
 
 controller_config = suite.load_controller_config(default_controller='OSC_POSITION')
 
@@ -13,7 +13,7 @@ class DropWrapper(gym.Wrapper):
         self.env = env
         self.use_gripper = True
         self.render_init = render_init
-        self.detector = Robosuite_Hanoi_Detector(self)
+        self.detector = Detector(self)
         self.nulified_action_indexes = nulified_action_indexes
         self.horizon = horizon
         self.step_count = 1

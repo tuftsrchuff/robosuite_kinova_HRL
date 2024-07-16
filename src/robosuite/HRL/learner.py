@@ -47,15 +47,14 @@ class Learner:
 			  novelty_id, 
 			  #**args - contains all environment specific details
 			  #			  env_config, 
-			  settings, 
-			  eval_settings, 
-			  verbose, 
+			  env_id=None,
+			  hrl=False,
 			  data_folder="", 
 			  use_basic_policies=True,
-			  hrl=False,
-			  env_id=None,
-			  **kwargs, #This passes in the rest as key-vals in dictionary
-			  *args #This passes in the rest of the args as only values as an array
+			#   settings, 
+			#   eval_settings, 
+			#   verbose, #These are passed in as kwargs
+			  **kwargs#This passes in the rest as key-vals in dictionary
 			  ) -> None:
 		print("Learner initialized...")
 		self.reload_synapses()
@@ -69,15 +68,10 @@ class Learner:
 
 		#env_id mapping still needs to be worked out in create_env function
 		print("\nCreating eval env.")
-		eval_env = create_env(env_id)
+		eval_env = create_env(env_id, kwargs)
 
 		print("Creating training env.")
 		training_env = create_env(env_id)
-
-		#Does training need a training wrapper like in learner_HRL?
-
-
-
 
 		
         #Modifying creation of environments

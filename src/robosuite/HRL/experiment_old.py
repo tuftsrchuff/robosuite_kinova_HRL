@@ -20,12 +20,13 @@ from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3 import SAC
 
-from robosuite.HRL.brain_old import *
+from brain import *
 from novelties import novelties_info
 
 from gym_carla_novelty.novelties.novelty_wrapper import NoveltyWrapper
 from gym_carla_novelty.operator_learners.train import train
 from gym_carla_novelty.operator_learners.evaluate_baseline import eval_success
+import carla
 from domain_synapses import *
 
 def conf_carla(port):
@@ -552,7 +553,312 @@ if __name__ == "__main__":
 					policy_file = '_'.join(sorted(args['previous']))
 					model = ("/").join([args['log_storage_folder'], name_novelty, policy_file])
 				print('\n==> WITH INITIAL POLICY {} <=='.format(model))
+
+	if  args['experiment'] == 'rapid':
+
+		brain = None
+		if args['pre_training']:
+			init = RapidExperiment(args, brain=brain, experiment_id=ex_id+"/init")
+			brain = init.train_init_policies()
+
+		# Novelty 'deflated_tire'
+		if reached_checkpoint or checkpoint == ['deflated_tire']:
+			args['checkpoint'], args['previous'] = ['deflated_tire'], []
+			experiment1 = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/tire")
+			brain = experiment1.run()
+			reached_checkpoint = True
+			args['previous'] = []
+
+		# Novelty 'black_ice'
+		if reached_checkpoint or checkpoint == ['black_ice']:
+			args['checkpoint'], args['previous'] = ['black_ice'], ['deflated_tire']
+			experiment2 = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/ice")
+			brain = experiment2.run()
+			eval = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/ice"+"/tire_eval", eval_only=True)
+			eval.run()
+			reached_checkpoint = True
+
+		# Novelty 'deflated_tire','rain'
+		if reached_checkpoint or checkpoint == ['deflated_tire','rain']:
+			args['checkpoint'], args['previous'] = ['deflated_tire','rain'], ['black_ice']
+			experiment3 = RapidExperiment(args, novelty_list=['deflated_tire','rain'], brain=brain, experiment_id=ex_id+"/tire_rain")
+			brain = experiment3.run()
+			eval = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/tire_rain"+"/tire_eval", eval_only=True)
+			eval.run()
+			eval = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/tire_rain"+"/ice_eval", eval_only=True)
+			eval.run()
+			reached_checkpoint = True
+
+		if not(args['half']):
+			# Novelty 'obstacle'
+			if reached_checkpoint or checkpoint == ['obstacle']:
+				args['checkpoint'], args['previous'] = ['obstacle'], ['deflated_tire','rain']
+				experiment4 = RapidExperiment(args, novelty_list=['obstacle'], brain=brain, experiment_id=ex_id+"/obstacle")
+				brain = experiment4.run()
+				eval = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/obstacle"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/obstacle"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['deflated_tire','rain'], brain=brain, experiment_id=ex_id+"/obstacle"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				reached_checkpoint = True
+
+			# Novelty 'obstacle','black_ice'
+			if reached_checkpoint or checkpoint == ['obstacle','black_ice']:
+				args['checkpoint'], args['previous'] = ['obstacle','black_ice'], ['obstacle']
+				experiment6 = RapidExperiment(args, novelty_list=['obstacle','black_ice'], brain=brain, experiment_id=ex_id+"/obstacle_ice")
+				brain = experiment6.run()	
+				eval = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/obstacle_ice"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/obstacle_ice"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['deflated_tire','rain'], brain=brain, experiment_id=ex_id+"/obstacle_ice"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['obstacle'], brain=brain, experiment_id=ex_id+"/obstacle_ice"+"/obstacle_eval", eval_only=True)
+				eval.run()
+				reached_checkpoint = True
+
+			# Novelty 'obstacle','mist'
+			if reached_checkpoint or checkpoint == ['obstacle','mist']:
+				args['checkpoint'], args['previous'] = ['obstacle','mist'], ['obstacle','black_ice']
+				experiment5 = RapidExperiment(args, novelty_list=['obstacle','mist'], brain=brain, experiment_id=ex_id+"/obstacle_mist")
+				brain = experiment5.run()
+				eval = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/obstacle_mist"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/obstacle_mist"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['deflated_tire','rain'], brain=brain, experiment_id=ex_id+"/obstacle_mist"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['obstacle'], brain=brain, experiment_id=ex_id+"/obstacle_mist"+"/obstacle_eval", eval_only=True)
+				eval.run()
+				eval = RapidExperiment(args, novelty_list=['obstacle','black_ice'], brain=brain, experiment_id=ex_id+"/obstacle_mist"+"/obstacle_ice_eval", eval_only=True)
+				eval.run()
+				reached_checkpoint = True
+
+			# Novelty 'traffic'
+			if reached_checkpoint or checkpoint == ['traffic']:
+				experiment11 = RapidExperiment(args, novelty_list=['traffic'], brain=brain, experiment_id=ex_id+"/traffic")
+				brain = experiment11.run()	
+				#eval = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/traffic"+"/tire_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/traffic"+"/ice_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['deflated_tire','rain'], brain=brain, experiment_id=ex_id+"/traffic"+"/tire_rain_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['obstacle'], brain=brain, experiment_id=ex_id+"/traffic"+"/obstacle_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['obstacle','mist'], brain=brain, experiment_id=ex_id+"/traffic"+"/obstacle_mist_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['obstacle','mist','rain'], brain=brain, experiment_id=ex_id+"/traffic"+"/obstacle_mist_rain_eval", eval_only=True)
+				#eval.run()
+				reached_checkpoint = True
 				
-    
-    experiment = RapidExperiment(args, experiment_id=ex_id, eval_only=args['eval'], eval_only_pre_post=args['eval_pre_post'])
-    brain = experiment.run()
+			# Novelty 'traffic','rain'
+			if reached_checkpoint or checkpoint == ['traffic','rain']:
+				experiment12 = RapidExperiment(args, novelty_list=['traffic','rain'], brain=brain, experiment_id=ex_id+"/traffic_rain")
+				brain = experiment12.run()
+				#eval = RapidExperiment(args, novelty_list=['deflated_tire'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/tire_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/ice_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['deflated_tire','rain'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/tire_rain_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['obstacle'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/obstacle_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['obstacle','mist'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/obstacle_mist_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['obstacle','mist','rain'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/obstacle_mist_rain_eval", eval_only=True)
+				#eval.run()
+				#eval = RapidExperiment(args, novelty_list=['traffic'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/traffic", eval_only=True)
+				#eval.run()
+				
+				experiment10 = RapidExperiment(args, novelty_list=['obstacle','rain'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/obstacle_rain_eval", eval_only=True)
+				brain = experiment10.run()
+				experiment_noise1 = RapidExperiment(args, novelty_list=['obstacle_jitter'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/obstacle_jitter", eval_only=True)
+				brain = experiment_noise1.run()
+				experiment_noise2 = RapidExperiment(args, novelty_list=['rain_jitter'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/rain_jitter", eval_only=True)
+				brain = experiment_noise2.run()
+				experiment_noise3 = RapidExperiment(args, novelty_list=['black_ice_jitter'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/black_ice_jitter", eval_only=True)
+				brain = experiment_noise3.run()
+				experiment7 = RapidExperiment(args, novelty_list=['obstacle','mist','black_ice'], brain=brain, experiment_id=ex_id+"/traffic_rain"+"/obstacle_mist_ice_eval", eval_only=True)
+				brain = experiment7.run()
+
+				reached_checkpoint = True
+
+	elif args['experiment'] == 'baseline':
+
+		# Novelty 'deflated_tire'
+		if reached_checkpoint or checkpoint == ['deflated_tire']:
+			args['checkpoint'], args['previous'] = ['deflated_tire'], []
+			experiment1 = BaselineExperiment(args, novelty_list=['deflated_tire'], model=args['model'], experiment_id=ex_id+"/tire")
+			model = experiment1.run()
+			reached_checkpoint = True
+
+		# Novelty 'black_ice'
+		if reached_checkpoint or checkpoint == ['black_ice']:
+			args['checkpoint'], args['previous'] = ['black_ice'], ['deflated_tire']
+			experiment2 = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/ice")
+			model = experiment2.run()
+			eval = BaselineExperiment(args, novelty_list=['deflated_tire'], model=model, experiment_id=ex_id+"/ice"+"/tire_eval", eval_only=True)
+			eval.run()
+			reached_checkpoint = True
+
+		# Novelty 'deflated_tire','rain'
+		if reached_checkpoint or checkpoint == ['deflated_tire','rain']:
+			args['checkpoint'], args['previous'] = ['deflated_tire','rain'], ['black_ice']
+			experiment3 = BaselineExperiment(args, novelty_list=['deflated_tire','rain'], model=model, experiment_id=ex_id+"/tire_rain")
+			model = experiment3.run()
+			eval = BaselineExperiment(args, novelty_list=['deflated_tire'], model=model, experiment_id=ex_id+"/tire_rain"+"/tire_eval", eval_only=True)
+			eval.run()
+			eval = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/tire_rain"+"/ice_eval", eval_only=True)
+			eval.run()
+			reached_checkpoint = True
+
+		if not(args['half']):
+			# Novelty 'obstacle'
+			if reached_checkpoint or checkpoint == ['obstacle']:
+				args['checkpoint'], args['previous'] = ['obstacle'], ['deflated_tire','rain']
+				experiment4 = BaselineExperiment(args, novelty_list=['obstacle'], model=model, experiment_id=ex_id+"/obstacle")
+				model = experiment4.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire'], model=model, experiment_id=ex_id+"/obstacle"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/obstacle"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire','rain'], model=model, experiment_id=ex_id+"/obstacle"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				reached_checkpoint = True
+
+			# Novelty 'obstacle','black_ice'
+			if reached_checkpoint or checkpoint == ['obstacle','black_ice']:
+				args['checkpoint'], args['previous'] = ['obstacle','black_ice'], ['obstacle']
+				experiment5 = BaselineExperiment(args, novelty_list=['obstacle','black_ice'], model=model, experiment_id=ex_id+"/obstacle_ice")
+				model = experiment5.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire'], model=model, experiment_id=ex_id+"/obstacle_ice"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/obstacle_ice"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire','rain'], model=model, experiment_id=ex_id+"/obstacle_ice"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle'], model=model, experiment_id=ex_id+"/obstacle_ice"+"/obstacle_eval", eval_only=True)
+				eval.run()
+				reached_checkpoint = True
+
+			# Novelty 'obstacle','mist'
+			if reached_checkpoint or checkpoint == ['obstacle','mist']:
+				args['checkpoint'], args['previous'] = ['obstacle','mist'], ['obstacle','black_ice']
+				experiment6 = BaselineExperiment(args, novelty_list=['obstacle','mist'], model=model, experiment_id=ex_id+"/obstacle_mist")
+				model = experiment6.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire'], model=model, experiment_id=ex_id+"/obstacle_mist"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/obstacle_mist"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire','rain'], model=model, experiment_id=ex_id+"/obstacle_mist"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle'], model=model, experiment_id=ex_id+"/obstacle_mist"+"/obstacle_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle','black_ice'], model=model, experiment_id=ex_id+"/obstacle_mist"+"/obstacle_ice_eval", eval_only=True)
+				eval.run()
+				reached_checkpoint = True
+
+			# Novelty 'traffic'
+			if reached_checkpoint or checkpoint == ['traffic']:
+				experiment11 = BaselineExperiment(args, novelty_list=['traffic'], model=model, experiment_id=ex_id+"/traffic")
+				model = experiment11.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire'], model=model, experiment_id=ex_id+"/traffic"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/traffic"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire','rain'], model=model, experiment_id=ex_id+"/traffic"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle'], model=model, experiment_id=ex_id+"/traffic"+"/obstacle_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle','mist'], model=model, experiment_id=ex_id+"/traffic"+"/obstacle_mist_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle','mist','rain'], model=model, experiment_id=ex_id+"/traffic"+"/obstacle_mist_rain_eval", eval_only=True)
+				eval.run()
+				reached_checkpoint = True
+
+			# Novelty 'traffic','rain'
+			if reached_checkpoint or checkpoint == ['traffic','rain']:
+				experiment12 = BaselineExperiment(args, novelty_list=['traffic','rain'], model=model, experiment_id=ex_id+"/traffic_rain")
+				model = experiment12.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire'], model=model, experiment_id=ex_id+"/traffic_rain"+"/tire_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/traffic_rain"+"/ice_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['deflated_tire','rain'], model=model, experiment_id=ex_id+"/traffic_rain"+"/tire_rain_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle'], model=model, experiment_id=ex_id+"/traffic_rain"+"/obstacle_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle','mist'], model=model, experiment_id=ex_id+"/traffic_rain"+"/obstacle_mist_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['obstacle','mist','rain'], model=model, experiment_id=ex_id+"/traffic_rain"+"/obstacle_mist_rain_eval", eval_only=True)
+				eval.run()
+				eval = BaselineExperiment(args, novelty_list=['traffic'], model=model, experiment_id=ex_id+"/traffic_rain"+"/traffic_eval", eval_only=True)
+				eval.run()
+
+				experiment10 = BaselineExperiment(args, novelty_list=['obstacle','rain'], model=model, experiment_id=ex_id+"/traffic_rain"+"/obstacle_rain_eval", eval_only=True)
+				model = experiment10.run()
+				experiment_noise1 = BaselineExperiment(args, novelty_list=['obstacle_jitter'], model=model, experiment_id=ex_id+"/traffic_rain"+"/obstacle_jitter", eval_only=True)
+				model = experiment_noise1.run()
+				experiment_noise2 = BaselineExperiment(args, novelty_list=['rain_jitter'], model=model, experiment_id=ex_id+"/traffic_rain"+"/rain_jitter", eval_only=True)
+				model = experiment_noise2.run()
+				experiment_noise3 = BaselineExperiment(args, novelty_list=['black_ice_jitter'], model=model, experiment_id=ex_id+"/traffic_rain"+"/black_ice_jitter", eval_only=True)
+				model = experiment_noise3.run()
+				experiment7 = BaselineExperiment(args, novelty_list=['obstacle','mist','black_ice'], model=model, experiment_id=ex_id+"/traffic_rain"+"/obstacle_mist_ice_eval", eval_only=True)
+				model = experiment7.run()
+				reached_checkpoint = True
+
+
+
+	elif args['experiment'] == 'traffic_baseline':
+
+		experiment11 = BaselineExperiment(args, novelty_list=['traffic'], model=args['model'], experiment_id=ex_id+"/traffic")
+		model = experiment11.run()
+		experiment12 = BaselineExperiment(args, novelty_list=['traffic','rain'], model=model, experiment_id=ex_id+"/traffic_rain")
+		model = experiment12.run()
+		experiment2 = BaselineExperiment(args, novelty_list=['black_ice'], model=model, experiment_id=ex_id+"/ice")
+		model = experiment2.run()
+
+	elif args['experiment'] == 'traffic_rapid':
+
+		experiment11 = RapidExperiment(args, novelty_list=['traffic'], experiment_id=ex_id+"/traffic")
+		brain = experiment11.run()	
+		experiment12 = RapidExperiment(args, novelty_list=['traffic','rain'], brain=brain, experiment_id=ex_id+"/traffic_rain")
+		brain = experiment12.run()
+		experiment2 = RapidExperiment(args, novelty_list=['black_ice'], brain=brain, experiment_id=ex_id+"/ice")
+		brain = experiment2.run()
+
+	elif args['experiment'] == 'vanilla_rapid':
+
+		RapidExperiment(args, novelty_list=['deflated_tire'], experiment_id=ex_id+"/tire", eval_only=True).run()
+		RapidExperiment(args, novelty_list=['black_ice'], experiment_id=ex_id+"/ice_", eval_only=True).run()
+		RapidExperiment(args, novelty_list=['deflated_tire','rain'], experiment_id=ex_id+"/tire_rain", eval_only=True).run()
+		RapidExperiment(args, novelty_list=['obstacle'], experiment_id=ex_id+"/obstacle", eval_only=True).run()
+		RapidExperiment(args, novelty_list=['obstacle','black_ice'], experiment_id=ex_id+"/obstacle_mist", eval_only=True).run()
+		RapidExperiment(args, novelty_list=['obstacle','mist'], experiment_id=ex_id+"/obstacle_mist", eval_only=True).run()
+		#RapidExperiment(args, novelty_list=['obstacle','black_ice'], experiment_id=ex_id+"/obstacle_ice", eval_only=True).run()
+		#RapidExperiment(args, novelty_list=['traffic'], experiment_id=ex_id+"/traffic", eval_only=True).run()
+		#RapidExperiment(args, novelty_list=['traffic','rain'], experiment_id=ex_id+"/traffic_rain", eval_only=True).run()
+
+	elif args['experiment'] == 'vanilla_baseline':
+
+		BaselineExperiment(args, novelty_list=['deflated_tire'], model=args['model'], experiment_id=ex_id+"/tire", eval_only=True).run()
+		BaselineExperiment(args, novelty_list=['black_ice'], model=args['model'], experiment_id=ex_id+"/ice", eval_only=True).run()
+		BaselineExperiment(args, novelty_list=['deflated_tire','rain'], model=args['model'], experiment_id=ex_id+"/tire_rain", eval_only=True).run()
+		BaselineExperiment(args, novelty_list=['obstacle'], model=args['model'], experiment_id=ex_id+"/obstacle", eval_only=True).run()
+		BaselineExperiment(args, novelty_list=['obstacle','black_ice'], model=args['model'], experiment_id=ex_id+"/obstacle_mist", eval_only=True).run()
+		BaselineExperiment(args, novelty_list=['obstacle','mist'], model=args['model'], experiment_id=ex_id+"/obstacle_mist", eval_only=True).run()
+		#BaselineExperiment(args, novelty_list=['obstacle','black_ice'], model=args['model'], experiment_id=ex_id+"/obstacle_ice", eval_only=True).run()
+		#BaselineExperiment(args, novelty_list=['traffic'], model=args['model'], experiment_id=ex_id+"/traffic", eval_only=True).run()
+		#BaselineExperiment(args, novelty_list=['traffic','rain'], model=args['model'], experiment_id=ex_id+"/traffic_rain", eval_only=True).run()
+
+	elif args['experiment'] == 'RL':
+
+		print('RL EXPERIMENT')
+		experiment = BaselineExperiment(args, model=args['model'], eval_only=args['eval'], experiment_id=ex_id)
+		model = experiment.run()
+
+	else:
+		experiment = RapidExperiment(args, experiment_id=ex_id, eval_only=args['eval'], eval_only_pre_post=args['eval_pre_post'])
+		brain = experiment.run()

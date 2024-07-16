@@ -439,6 +439,47 @@ class Brain:
 				if success:
 					#If any of the expected executor effects exactly match the execution effects break
 					break
+				
+
+				# try:
+				# 	# executor execution
+				# 	if executors[executor].hrl:
+				# 		model = PPO.load(executors[executor].policy, env=env)
+				# 		#self.hrl_env.overwrite_executor_id(executor)
+				# 		env.overwrite_executor_id(executor)
+				# 		exec_env = env
+				# 		#exec_env.overwrite_executor_id(executor)
+				# 		print("HRL EXECUTOR")
+				# 	else:
+				# 		model = SAC.load(executors[executor].policy, env=low_env, custom_objects={"observation_space":low_env.observation_space, "action_space":low_env.action_space})
+				# 		exec_env = low_env
+				# 	while not done:
+				# 		action, _states = model.predict(obs)
+				# 		obs, reward, done, info = exec_env.step(action)
+				# 		step_executor += 10 if executors[executor].hrl else 1
+				# 		rew_eps += reward
+				# 		done = executors[executor].Beta(operator=plan[i], env=low_env)
+				# 		if step_executor > 1000 or info['collision']:
+				# 			done = True
+
+				# 	# comparing execution effects to expected effects
+				# 	new_state = detector(low_env)
+				# 	expected_effects = effects(plan[i])
+				# 	execution_effects = new_state.compare(old_state)
+				# 	self.verboseprint("The operator expected effects are: {}, the execution effects are: {}.".format(expected_effects, execution_effects))
+				# 	#Operand expected effects match the execution effects
+
+				# 	success = (all(x in execution_effects for x in expected_effects))
+				# 	if success:
+				# 		break
+				# 	else:
+				# 		self.verboseprint("\n{} failed. Moving to next executor in {} queue.\n".format(executors[executor].id, plan[i]))
+				# # exceptions handling
+				# except FileNotFoundError: 
+				# 	self.verboseprint("FileNotFound: Tried to execute {} '{}', but it failed. Trying to continue...".format(executors[executor].id, executor))
+				# except RuntimeError:
+				# 	self.verboseprint("\nRuntime Error while executing {}. Moving to next executor in {} queue.\n".format(executors[executor].id, plan[i]))
+				# 	success = False
 
 			if not success:
 				self.verboseprint("\nThe execution effects don't match the operator {}. Launching recovery mode.\n".format(plan[i]))

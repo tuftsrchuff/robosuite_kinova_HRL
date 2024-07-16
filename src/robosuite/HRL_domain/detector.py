@@ -4,7 +4,7 @@ from robosuite.models.grippers import GripperModel
 import matplotlib.pyplot as plt
 
 
-class Robosuite_Hanoi_Detector:
+class Detector:
     def __init__(self, env):
         self.env = env
         self.objects = ['cube1', 'cube2', 'cube3']
@@ -130,7 +130,7 @@ class Robosuite_Hanoi_Detector:
         else:
             return bool(z_dist < 0.15)
 
-    def get_groundings(self, as_dict=False, binary_to_float=False, return_distance=False):
+    def get_state(self, as_dict=False, binary_to_float=False, return_distance=False):
             
             groundings = {}
     
