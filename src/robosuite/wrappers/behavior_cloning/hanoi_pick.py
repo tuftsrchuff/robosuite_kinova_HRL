@@ -13,7 +13,7 @@ class PickWrapper(gym.Wrapper):
         self.env = env
         self.use_gripper = True
         self.render_init = render_init
-        self.detector = Detector(self)
+        self.detector = Detector(env)
         self.nulified_action_indexes = nulified_action_indexes
         self.horizon = horizon
         self.step_count = 1
@@ -42,9 +42,10 @@ class PickWrapper(gym.Wrapper):
         low = -high
         self.observation_space = gym.spaces.Box(low, high, dtype=np.float64)
         # Reduce the action space by the length of the nulified indexes (take the range low high of the action space from the env.action_space)
-        self.action_space = gym.spaces.Box(low=self.env.action_space.low[:-len(nulified_action_indexes)], high=self.env.action_space.high[:-len(nulified_action_indexes)], dtype=np.float64)
-        #print("Action space: ", self.action_space)
-        #print("Action sample: ", self.action_space.sample())
+        if nulified_action_indexes == []:
+            self.action_space = gym.spaces.Box(low=self.env.action_space.low[:], high=self.env.action_space.high[:], dtype=np.float64)
+        else:
+            self.action_space = gym.spaces.Box(low=self.env.action_space.low[:-len(nulified_action_indexes)], high=self.env.action_space.high[:-len(nulified_action_indexes)], dtype=np.float64)
 
     def search_free_space(self, cube, locations, reset_state):
         drop_off = np.random.choice(locations)
@@ -197,7 +198,7 @@ class PickWrapper(gym.Wrapper):
             obs, reward, terminated, truncated, info = self.env.step(action)
         except:
             obs, reward, terminated, info = self.env.step(action)
-        state = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=False)
+        state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
         # test if self.obj_to_pick (and only self.obj_to_pick) is grasped
         state = {k: state[k] for k in state.keys() if 'grasped' in k and state[k]}
         try:

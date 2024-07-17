@@ -571,6 +571,7 @@ class RobotEnv(MujocoEnv):
         Raises:
             AssertionError: [Invalid action dimension]
         """
+        # print(action)
         # Verify that the action is the correct dimension
         assert len(action) == self.action_dim, "environment got invalid action dimension -- expected {}, got {}".format(
             self.action_dim, len(action)

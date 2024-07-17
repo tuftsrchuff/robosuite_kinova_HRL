@@ -17,8 +17,8 @@ env.reset()
 #env.robots stores array of robot objects
 
 action = np.random.randn(env.robots[0].dof) # sample random action
-obs, reward, done, info = env.step(action)  # take action in the environment
-print(reward)
+data = env.step(action)  # take action in the environment
+print(data)
 
 for i in range(100):
     action = np.random.randn(env.robots[0].dof) # sample random action

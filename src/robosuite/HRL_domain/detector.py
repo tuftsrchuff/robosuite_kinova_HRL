@@ -130,7 +130,7 @@ class Detector:
         else:
             return bool(z_dist < 0.15)
 
-    def get_state(self, as_dict=False, binary_to_float=False, return_distance=False):
+    def get_groundings(self, as_dict=False, binary_to_float=False, return_distance=False):
             
             groundings = {}
     

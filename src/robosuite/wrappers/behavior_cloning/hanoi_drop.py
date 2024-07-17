@@ -13,7 +13,7 @@ class DropWrapper(gym.Wrapper):
         self.env = env
         self.use_gripper = True
         self.render_init = render_init
-        self.detector = Detector(self)
+        self.detector = Detector(env)
         self.nulified_action_indexes = nulified_action_indexes
         self.horizon = horizon
         self.step_count = 1
@@ -42,7 +42,11 @@ class DropWrapper(gym.Wrapper):
         high = np.inf * np.ones(self.obs_dim)
         low = -high
         self.observation_space = gym.spaces.Box(low, high, dtype=np.float64)
-        self.action_space = gym.spaces.Box(low=self.env.action_space.low[:-len(nulified_action_indexes)], high=self.env.action_space.high[:-len(nulified_action_indexes)], dtype=np.float64)
+        if nulified_action_indexes == []:
+            self.action_space = gym.spaces.Box(low=self.env.action_space.low[:], high=self.env.action_space.high[:], dtype=np.float64)
+        else:
+            self.action_space = gym.spaces.Box(low=self.env.action_space.low[:-len(nulified_action_indexes)], high=self.env.action_space.high[:-len(nulified_action_indexes)], dtype=np.float64)
+
 
     def search_free_space(self, cube, locations, reset_state):
         drop_off = np.random.choice(locations)
@@ -258,7 +262,7 @@ class DropWrapper(gym.Wrapper):
             obs, reward, terminated, truncated, info = self.env.step(action)
         except:
             obs, reward, terminated, info = self.env.step(action)
-        state = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=False)
+        state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
         success = state[f"on({self.obj_to_pick},{self.place_to_drop})"]
         info['is_sucess'] = success
         truncated = truncated or self.env.done

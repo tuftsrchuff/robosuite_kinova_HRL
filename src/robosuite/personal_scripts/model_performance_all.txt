@@ -1,0 +1,123 @@
+What policy would you like to train?
+	1. Reach-pick
+	2. Pick
+	3. Drop
+	4. Reach-drop
+	5. All but Reach-drop
+Training for 1000000 steps
+Training all
+Training ReachPick
+Using cuda device
+Wrapping the env in a DummyVecEnv.
+Logging to ./logs/SAC_7
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0        |
+| time/              |          |
+|    episodes        | 4        |
+|    fps             | 48       |
+|    time_elapsed    | 41       |
+|    total_timesteps | 2000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0        |
+| time/              |          |
+|    episodes        | 8        |
+|    fps             | 38       |
+|    time_elapsed    | 105      |
+|    total_timesteps | 4000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0        |
+| time/              |          |
+|    episodes        | 12       |
+|    fps             | 38       |
+|    time_elapsed    | 154      |
+|    total_timesteps | 6000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 469      |
+|    ep_rew_mean     | 0.0625   |
+| time/              |          |
+|    episodes        | 16       |
+|    fps             | 39       |
+|    time_elapsed    | 191      |
+|    total_timesteps | 7502     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 475      |
+|    ep_rew_mean     | 0.05     |
+| time/              |          |
+|    episodes        | 20       |
+|    fps             | 44       |
+|    time_elapsed    | 213      |
+|    total_timesteps | 9502     |
+---------------------------------
+Eval num_timesteps=10000, episode_reward=0.00 +/- 0.00
+Episode length: 500.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 500      |
+|    mean_reward     | 0        |
+| time/              |          |
+|    total_timesteps | 10000    |
+---------------------------------
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 459      |
+|    ep_rew_mean     | 0.0833   |
+| time/              |          |
+|    episodes        | 24       |
+|    fps             | 27       |
+|    time_elapsed    | 405      |
+|    total_timesteps | 11014    |
+| train/             |          |
+|    actor_loss      | -13.1    |
+|    critic_loss     | 0.0435   |
+|    ent_coef        | 0.738    |
+|    ent_coef_loss   | -2.04    |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 1013     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 465      |
+|    ep_rew_mean     | 0.0714   |
+| time/              |          |
+|    episodes        | 28       |
+|    fps             | 27       |
+|    time_elapsed    | 472      |
+|    total_timesteps | 13014    |
+| train/             |          |
+|    actor_loss      | -23.4    |
+|    critic_loss     | 1.93     |
+|    ent_coef        | 0.405    |
+|    ent_coef_loss   | -6.09    |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 3013     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 469      |
+|    ep_rew_mean     | 0.0625   |
+| time/              |          |
+|    episodes        | 32       |
+|    fps             | 29       |
+|    time_elapsed    | 511      |
+|    total_timesteps | 15014    |
+| train/             |          |
+|    actor_loss      | -27.5    |
+|    critic_loss     | 0.149    |
+|    ent_coef        | 0.223    |
+|    ent_coef_loss   | -9.96    |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 5013     |
+---------------------------------
