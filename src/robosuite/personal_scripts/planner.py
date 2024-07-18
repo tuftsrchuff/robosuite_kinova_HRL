@@ -57,7 +57,7 @@ def _output_to_plan(output, structure):
     
 if __name__ == "__main__":
     print("Executing plan...")
-    pddl_dir = "/home/ryan/Desktop/HRLResearch/robosuite_kinova_HRL/src/robosuite/PDDL"
+    pddl_dir = "../PDDL"
     domain_dir = "Domains"
     problem_dir = "Problems"
     
