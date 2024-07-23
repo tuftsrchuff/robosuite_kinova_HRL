@@ -2,16 +2,12 @@ import os
 import copy
 import subprocess
 
-
- 
-def call_planner(domain, problem, structure="pddl"):
+def call_planner(domain_path, problem_path, structure="pddl"):
     '''
         Given a domain and a problem file
         This function return the ffmetric Planner output.
         In the action format
     '''
-    domain_path = pddl_dir + os.sep + domain + ".pddl"
-    problem_path = pddl_dir + os.sep + problem + ".pddl"
     if structure == "pddl":
         run_script = f"../../../Metric-FF-v2.1/./ff -o {domain_path} -f {problem_path} -s 0"
         output = subprocess.getoutput(run_script)
@@ -60,6 +56,11 @@ if __name__ == "__main__":
     pddl_dir = "../PDDL"
     domain_dir = "Domains"
     problem_dir = "Problems"
+    domain = "domain"
+    problem = "problem"
+
+    domain_path = pddl_dir + os.sep + domain + ".pddl"
+    problem_path = pddl_dir + os.sep + problem + ".pddl"
     
     plan, game_action_set = call_planner("domain", "problem")
     print("Plan")
