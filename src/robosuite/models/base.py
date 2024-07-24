@@ -525,6 +525,7 @@ class MujocoXMLModel(MujocoXML, MujocoModel):
 
         # Parse element tree to get all relevant bodies, joints, actuators, and geom groups
         self._elements = sort_elements(root=self.root, element_filter=_add_default_name_filter)
+        # print(self._elements)
         assert (
             len(self._elements["root_body"]) == 1
         ), "Invalid number of root bodies found for robot model. Expected 1," "got {}".format(

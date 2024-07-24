@@ -263,7 +263,7 @@ class DropWrapper(gym.Wrapper):
         except:
             obs, reward, terminated, info = self.env.step(action)
         state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
-        success = state[f"on({self.obj_to_pick},{self.place_to_drop})"]
+        success = state[f"on({self.obj_to_pick},{self.place_to_drop})"] and not state[f"grasped({self.obj_to_pick})"]
         info['is_sucess'] = success
         truncated = truncated or self.env.done
         terminated = terminated or success

@@ -23,12 +23,13 @@ if __name__ == "__main__":
     # time.sleep(15)
 
     def print_params():
-        print(f"cube mass: {env.sim.model.body_mass[cube_body_id]}")
-        print(f"cube frictions: {env.sim.model.geom_friction[cube_geom_ids]}")
+        print(vars(env.sim.model))
+        # print(f"cube mass: {env.sim.model.body_mass[cube_body_id]}")
+        # print(f"cube frictions: {env.sim.model.geom_friction[cube_geom_ids]}")
         print()
 
-    joints = env.robots[0].robot_model.joints
-    print(joints)
+    print("PRE MODS")
+    print_params()
 
     # modder = DynamicsModder(sim=env.sim, random_state=np.random.RandomState(5))
     # # modder.mod(env.robot.joint, "damping", 0.8)                                # make the joint stiff
@@ -40,25 +41,32 @@ if __name__ == "__main__":
     # time.sleep(5)
 
 
-    executeAction("cube1", env)
-    time.sleep(10)
-    env.reset()
+    # executeAction("cube1", env)
+    # time.sleep(10)
+    # env.reset()
 
 
 
     print("Executing pick with novelty injection")
     print(env.sim)
     joints = env.robots[0].robot_model.joints
-    print(joints)
+    # print(joints)
     modder = DynamicsModder(sim=env.sim, random_state=np.random.RandomState(5))
-    modder.mod(env.robot.joint, "stiffness", 5.0)                                # make the joint stiff
-    for joint in env.robot.joint:
-        modder.mod(joint, "stiffness", [2.0, 0.2, 0.04])           # greatly increase the friction
+    for joint in env.robots[0].robot_model.joints:
+        modder.mod(joint, "stiffness", 0.1)           # modify stiffness
+    for joint in env.robots[0].robot_model.joints:
+        modder.mod(joint, "damping", 5.0)           # modify damping
+    for joint in env.robots[0].robot_model.joints:
+        modder.mod(joint, "frictionloss", 5.0)           # modify friction loss
     modder.update()                                                   # make sure the changes propagate in sim
 
     # Print out modified parameter values
     print("MODIFIED VALUES")
     print_params()
+
+    executeAction("cube1", env)
+    time.sleep(10)
+    env.reset()
 
     # We can also restore defaults (original values) at any time
     modder.restore_defaults()
@@ -69,7 +77,7 @@ if __name__ == "__main__":
 
 
 
-    #TODO: Update this modder to properly update friction on all joints
-    self.modder.mod(geom_name, "friction", [2.0, 0.2, 0.04])  
-    self.modder.update()  
+    # #TODO: Update this modder to properly update friction on all joints
+    # self.modder.mod(geom_name, "friction", [2.0, 0.2, 0.04])  
+    # self.modder.update()  
     
