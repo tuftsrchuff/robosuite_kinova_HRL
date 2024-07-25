@@ -6,11 +6,14 @@ from robosuite.environments.manipulation.single_arm_env import SingleArmEnv
 from robosuite.models.arenas import TableArena
 from robosuite.models.objects import BoxObject
 from robosuite.models.objects import PlateVisualObject
+from robosuite.models.objects import DoorObject
 from robosuite.models.tasks import ManipulationTask
 from robosuite.utils.mjcf_utils import CustomMaterial
 from robosuite.utils.observables import Observable, sensor
 from robosuite.utils.placement_samplers import UniformRandomSampler, SequentialCompositeSampler
 from robosuite.utils.transform_utils import convert_quat
+from robosuite.personal_scripts.door import DoorNovelty
+import time
 
 
 class Hanoi(SingleArmEnv):
@@ -166,6 +169,8 @@ class Hanoi(SingleArmEnv):
         renderer="mujoco",
         renderer_config=None,
         random_reset = False,
+        door_pos=(0, -0.18, 0.8, -3*np.pi/2),
+        door_locked=True
     ):
         # settings for table top
         self.table_full_size = table_full_size
@@ -183,6 +188,8 @@ class Hanoi(SingleArmEnv):
         # object placement initializer
         self.reset_state = None
         self.placement_initializer = placement_initializer
+        self.door_pos = door_pos
+        self.door_locked = door_locked
 
         super().__init__(
             robots=robots,
@@ -389,9 +396,18 @@ class Hanoi(SingleArmEnv):
         self.visual_peg2 = PlateVisualObject(name="peg2")
         self.visual_peg3 = PlateVisualObject(name="peg3")
         self.pegs_xy_pos = [[0.1, -0.13], [0.1, 0.07], [0.1, 0.27]]
+
         # Set pegs to be centered at xy pos (-0.1 x-axis, -0.05 y-axis shifted from the pegs_xy_pos)
         self.pegs_xy_center = [[0, -0.18, 0.8], [0, 0.02, 0.8], [0, 0.22, 0.8]]
         self.peg_radius = 0.0
+
+            #Add door
+        self.door = DoorObject(
+                name="Door",
+                friction=0,
+                damping=0,
+                lock=True, 
+            )
         
         cubes = [self.cube1, self.cube2, self.cube3]
         pegs = [self.visual_peg1, self.visual_peg2, self.visual_peg3]
@@ -442,6 +458,27 @@ class Hanoi(SingleArmEnv):
                         reference_pos=self.table_offset,
                         z_offset=-0.062,
                     ))
+            
+            print("Making door")
+            time.sleep(5)
+            self.peg_placement_initializer.append_sampler(
+                UniformRandomSampler(
+                        name="DoorSampler",
+                        mujoco_objects=self.door,
+                        x_range=[self.door_pos[0], self.door_pos[0]+0.001],
+                        y_range=[self.door_pos[1], self.door_pos[1]+0.001],
+                        rotation=self.door_pos[3],
+                        #TODO NOVELTY: Values for the novelty injection
+                        #x_range=[0.050, 0.051],
+                        #y_range=[0.470, 0.471],
+                        #rotation=5*np.pi / 4.0,#(-np.pi / 2.0 - 0.25, -np.pi / 2.0),
+                        rotation_axis="z",
+                        ensure_object_boundary_in_range=False,
+                        ensure_valid_placement=False,
+                        reference_pos=self.table_offset,
+                        z_offset=-0.062,
+                    )
+            )
 
             if not(self.random_reset):
                 place = 0
@@ -477,11 +514,13 @@ class Hanoi(SingleArmEnv):
                 z_offset=0.01,
             )
         self.object_placements = {"cube1":None, "cube2":None, "cube3":None}
+        muj_obj_for_model = cubes+pegs
+        muj_obj_for_model.append(self.door)
         # task includes arena, robot, and objects of interest
         self.model = ManipulationTask(
             mujoco_arena=mujoco_arena,
             mujoco_robots=[robot.robot_model for robot in self.robots],
-            mujoco_objects=cubes+pegs,
+            mujoco_objects=muj_obj_for_model,
         )
 
     def _setup_references(self):
