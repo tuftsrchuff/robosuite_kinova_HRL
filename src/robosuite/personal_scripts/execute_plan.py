@@ -26,6 +26,17 @@ def executeAction(base_action, toMove, destination, env):
     done = executor.execute_policy(symgoal=toMove)
     # print(f"Done: {done}")
     time.sleep(5)
+    # print("Opening gripper...")
+    # for i in range(50):
+    #     obs,_,_,_,_ = exec_env.step([0,0,0,-1])
+    #     exec_env.render()
+    #     time.sleep(0.25)
+    
+    # print("Closing gripper...")
+    # for i in range(50):
+    #     obs,_,_,_,_= exec_env.step([0,0,0,1])
+    #     exec_env.render()
+    #     time.sleep(0.25)
 
     #Terminated environment, use base env and rewrap?
     print(f"Pick {toMove}")

@@ -161,7 +161,9 @@ class ReachPickWrapper(gym.Wrapper):
         while not reset:
             trials = 0
             self.reset_state = self.sample_reset_state()
+            # print(f"Reset state {self.reset_state}")
             self.task = self.sample_task()
+            # print(f"Task: {self.task}")
             self.env.reset_state = self.reset_state
             success = False
             while not success:
@@ -189,6 +191,7 @@ class ReachPickWrapper(gym.Wrapper):
         self.sim.forward()
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
+        print(f"Reset --- obj to pick {self.obj_to_pick}")
         return obs, info
 
     def step(self, action):
@@ -209,6 +212,7 @@ class ReachPickWrapper(gym.Wrapper):
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
         reward = 1 if success else 0
         self.step_count += 1
+        self.env.render()
         if self.step_count > self.horizon:
             terminated = True
         return obs, reward, terminated, truncated, info

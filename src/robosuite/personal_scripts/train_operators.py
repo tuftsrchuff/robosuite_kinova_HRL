@@ -47,7 +47,7 @@ def train_reach_pick(env, eval_env):
     # Define the evaluation callback
     eval_callback = EvalCallback(
         eval_env,
-        best_model_save_path='./models/ReachPick',
+        best_model_save_path='./models/ReachPickTEST',
         log_path='./logs/',
         eval_freq=10000,
         n_eval_episodes=10,
@@ -64,7 +64,7 @@ def train_reach_pick(env, eval_env):
     )
 
     # Save the model
-    model.save(os.path.join('./models/reachpick_sac'))
+    model.save(os.path.join('./models/reachpick_sac_TEST'))
 
 def train_pick(env, eval_env):
     print("Training Pick")
@@ -233,6 +233,7 @@ def create_envs():
         use_camera_obs=False,
         render_camera="agentview",
         controller_configs=controller_config,
+        random_reset = True
     )
 
     eval_env = suite.make(
@@ -243,6 +244,7 @@ def create_envs():
         use_camera_obs=False,
         render_camera="agentview",
         controller_configs=controller_config,
+        random_reset = True
     )
 
     env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])

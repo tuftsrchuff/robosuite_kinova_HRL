@@ -64,21 +64,18 @@ class Executor():
 
         Beta = termination_indicator(self.operator)
         terminated = False
+        print(symgoal)
 
         #Need to pass in initial observation somehow        
         while not done and not terminated:
             action, _states = model.predict(obs)
-            # if self.operator == "reach_drop":
-            #     action[0] = 0.0
-                # time.sleep(3)
+            # if self.operator == 'reach_pick':
+            #     action[3] = 0
+                # print(action)
             obs, reward, terminated, truncated, info = self.env.step(action)
 
             #addGoal
             obs = addGoal(obs, symgoal, self.env, self.operator)
-            # if self.operator in ["reach_pick", "pick", "reach_drop"]:
-            #     obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[symgoal]][:3]))
-            # else:
-            #     obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[symgoal[1]]][:3]))
             step_executor += 1
             rew_eps += reward
             done = Beta(self.env, symgoal)
@@ -108,11 +105,9 @@ class Executor():
         print(f"Execution efects {execution_effects}")
 
 
-        # self.verboseprint("The operator expected effects are: {}, the execution effects are: {}.".format(expected_effects, execution_effects))
         success = (all(x in execution_effects for x in expected_effects))
         if success:
             return True
         else:
-            # self.verboseprint("\n{} failed. Moving to next executor in {} queue.\n".format(self.operator, "something"))
             print(f"{self.operator} failed...")
             return False
