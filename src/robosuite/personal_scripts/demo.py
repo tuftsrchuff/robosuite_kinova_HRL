@@ -4,7 +4,7 @@ from robosuite.utils.mjmod import DynamicsModder
 
 # create environment instance
 env = suite.make(
-    env_name="Hanoi", # try with other tasks like "Stack" and "Door"
+    env_name="DoorNovelty", # try with other tasks like "Stack" and "Door"
     robots="Kinova3",  # try with other robots like "Sawyer" and "Jaco"
     has_renderer=True,
     has_offscreen_renderer=False,

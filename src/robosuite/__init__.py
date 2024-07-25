@@ -16,7 +16,7 @@ from robosuite.environments.manipulation.two_arm_transport import TwoArmTranspor
 from robosuite.environments.novelties.obstacle import Obstacle
 from robosuite.environments.novelties.hole import Hole
 from robosuite.environments.novelties.locked import Locked
-from robosuite.environments.novelties.door import Door
+from robosuite.environments.novelties.door import DoorNovelty
 from robosuite.environments.novelties.elevated import Elevated
 from robosuite.environments.novelties.light_off import Lightoff
 
