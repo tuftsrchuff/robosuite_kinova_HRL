@@ -47,7 +47,7 @@ def train_reach_pick(env, eval_env):
     # Define the evaluation callback
     eval_callback = EvalCallback(
         eval_env,
-        best_model_save_path='./models/ReachPickTEST',
+        best_model_save_path='./models/ReachPick',
         log_path='./logs/',
         eval_freq=10000,
         n_eval_episodes=10,
@@ -64,7 +64,7 @@ def train_reach_pick(env, eval_env):
     )
 
     # Save the model
-    model.save(os.path.join('./models/reachpick_sac_TEST'))
+    model.save(os.path.join('./models/reachpick_sac'))
 
 def train_pick(env, eval_env):
     print("Training Pick")
