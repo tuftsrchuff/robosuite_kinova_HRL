@@ -158,6 +158,7 @@ def create_env(env_id, render=False, seed=None):
         use_camera_obs=False,
         # render_camera="agentview",
         controller_configs=controller_config,
+        random_reset = True
     )
 
     return env
