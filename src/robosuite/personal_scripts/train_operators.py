@@ -213,8 +213,8 @@ def train_reach_drop(env, eval_env):
 
 def train_all():
     print("Training all")
-    env, eval_env = create_envs()
-    train_reach_pick(env, eval_env)
+    # env, eval_env = create_envs()
+    # train_reach_pick(env, eval_env)
     
     env, eval_env = create_envs()
     train_pick(env, eval_env)

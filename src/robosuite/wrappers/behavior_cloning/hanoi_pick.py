@@ -185,6 +185,7 @@ class PickWrapper(gym.Wrapper):
         self.sim.forward()
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
+        # print(self.obj_to_pick)
         return obs, info
     
     def step(self, action):
@@ -213,6 +214,7 @@ class PickWrapper(gym.Wrapper):
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
         reward = 1 if success else 0
         self.step_count += 1
+        # self.env.render()
         if self.step_count > self.horizon:
             terminated = True
         return obs, reward, terminated, truncated, info

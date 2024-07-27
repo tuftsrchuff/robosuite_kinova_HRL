@@ -1,0 +1,159 @@
+What policy would you like to train?
+	1. Reach-pick
+	2. Pick
+	3. Drop
+	4. Reach-drop
+	5. All
+Training for 1000000 steps
+Training all
+Training Pick
+Using cuda device
+Wrapping the env in a DummyVecEnv.
+Logging to ./logs/SAC_30
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0        |
+| time/              |          |
+|    episodes        | 4        |
+|    fps             | 75       |
+|    time_elapsed    | 26       |
+|    total_timesteps | 2000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0        |
+| time/              |          |
+|    episodes        | 8        |
+|    fps             | 84       |
+|    time_elapsed    | 47       |
+|    total_timesteps | 4000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0        |
+| time/              |          |
+|    episodes        | 12       |
+|    fps             | 87       |
+|    time_elapsed    | 68       |
+|    total_timesteps | 6000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0        |
+| time/              |          |
+|    episodes        | 16       |
+|    fps             | 87       |
+|    time_elapsed    | 91       |
+|    total_timesteps | 8000     |
+---------------------------------
+{'grasped(cube3)': True}
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 489      |
+|    ep_rew_mean     | 0.05     |
+| time/              |          |
+|    episodes        | 20       |
+|    fps             | 89       |
+|    time_elapsed    | 109      |
+|    total_timesteps | 9786     |
+---------------------------------
+Eval num_timesteps=10000, episode_reward=0.00 +/- 0.00
+Episode length: 500.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 500      |
+|    mean_reward     | 0        |
+| time/              |          |
+|    total_timesteps | 10000    |
+---------------------------------
+New best mean reward!
+{'grasped(cube1)': True}
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 476      |
+|    ep_rew_mean     | 0.0833   |
+| time/              |          |
+|    episodes        | 24       |
+|    fps             | 60       |
+|    time_elapsed    | 189      |
+|    total_timesteps | 11412    |
+| train/             |          |
+|    actor_loss      | -15.9    |
+|    critic_loss     | 0.0401   |
+|    ent_coef        | 0.655    |
+|    ent_coef_loss   | -2.86    |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 1411     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 479      |
+|    ep_rew_mean     | 0.0714   |
+| time/              |          |
+|    episodes        | 28       |
+|    fps             | 60       |
+|    time_elapsed    | 221      |
+|    total_timesteps | 13412    |
+| train/             |          |
+|    actor_loss      | -24.8    |
+|    critic_loss     | 0.101    |
+|    ent_coef        | 0.36     |
+|    ent_coef_loss   | -6.89    |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 3411     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 482      |
+|    ep_rew_mean     | 0.0625   |
+| time/              |          |
+|    episodes        | 32       |
+|    fps             | 60       |
+|    time_elapsed    | 253      |
+|    total_timesteps | 15412    |
+| train/             |          |
+|    actor_loss      | -27.4    |
+|    critic_loss     | 1.74     |
+|    ent_coef        | 0.198    |
+|    ent_coef_loss   | -10.6    |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 5411     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 484      |
+|    ep_rew_mean     | 0.0556   |
+| time/              |          |
+|    episodes        | 36       |
+|    fps             | 60       |
+|    time_elapsed    | 288      |
+|    total_timesteps | 17412    |
+| train/             |          |
+|    actor_loss      | -27.6    |
+|    critic_loss     | 2.86     |
+|    ent_coef        | 0.11     |
+|    ent_coef_loss   | -13.4    |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 7411     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 485      |
+|    ep_rew_mean     | 0.05     |
+| time/              |          |
+|    episodes        | 40       |
+|    fps             | 60       |
+|    time_elapsed    | 319      |
+|    total_timesteps | 19412    |
+| train/             |          |
+|    actor_loss      | -26.6    |
+|    critic_loss     | 0.187    |
+|    ent_coef        | 0.0625   |
+|    ent_coef_loss   | -15      |
+|    learning_rate   | 0.0003   |
+|    n_updates       | 9411     |
+---------------------------------
