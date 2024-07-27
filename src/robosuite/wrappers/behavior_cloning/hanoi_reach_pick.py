@@ -3,6 +3,7 @@ import gymnasium as gym
 import robosuite as suite
 import numpy as np
 from robosuite.HRL_domain.detector import Detector
+import time
 
 controller_config = suite.load_controller_config(default_controller='OSC_POSITION')
 
@@ -191,7 +192,8 @@ class ReachPickWrapper(gym.Wrapper):
         self.sim.forward()
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
-        print(f"Reset --- obj to pick {self.obj_to_pick}")
+        # print(f"Reset --- obj to pick {self.obj_to_pick}")
+        # time.sleep(5)
         return obs, info
 
     def step(self, action):
@@ -204,15 +206,20 @@ class ReachPickWrapper(gym.Wrapper):
             obs, reward, terminated, truncated, info = self.env.step(action)
         except:
             obs, reward, terminated, info = self.env.step(action)
+        state_dist = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=True)
         state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        
         success = state[f"over(gripper,{self.obj_to_pick})"]
         info['is_sucess'] = success
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
-        reward = 1 if success else 0
+        reward = -state_dist[f"over(gripper,{self.obj_to_pick})"]
+        # print(f"Reward {reward}")
+        # self.env.render()
+        # time.sleep(5)
         self.step_count += 1
-        self.env.render()
+        # self.env.render()
         if self.step_count > self.horizon:
             terminated = True
         return obs, reward, terminated, truncated, info

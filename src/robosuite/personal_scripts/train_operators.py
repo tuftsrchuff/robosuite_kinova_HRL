@@ -222,6 +222,9 @@ def train_all():
     env, eval_env = create_envs()
     train_drop(env, eval_env)
 
+    env, eval_env = create_envs()
+    train_reach_drop(env, eval_env)
+
 
 def create_envs():
     # create environment instance
@@ -259,7 +262,7 @@ if __name__ == "__main__":
     print("\t2. Pick")
     print("\t3. Drop")
     print("\t4. Reach-drop")
-    print("\t5. All but Reach-drop")
+    print("\t5. All")
     policy_train_selection = int(input())
 
 
