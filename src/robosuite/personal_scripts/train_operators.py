@@ -60,7 +60,8 @@ def train_reach_pick(env, eval_env):
     # Train the model
     model.learn(
         total_timesteps=TRAINING_STEPS,
-        callback=eval_callback
+        callback=eval_callback,
+        progress_bar=True
     )
 
     # Save the model

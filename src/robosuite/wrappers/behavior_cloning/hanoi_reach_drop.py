@@ -3,6 +3,7 @@ import gymnasium as gym
 import robosuite as suite
 import numpy as np
 from robosuite.HRL_domain.detector import Detector
+import time
 
 controller_config = suite.load_controller_config(default_controller='OSC_POSITION')
 
@@ -221,8 +222,14 @@ class ReachDropWrapper(gym.Wrapper):
                 reset = success
                 if trials > 3:
                     break   
-
+        state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        while state[f'clear({self.place_to_drop})'] == False:
+            # print("Invalid state, resetting...")
+            # print(f"Not clear {self.place_to_drop} {state[f'clear({self.place_to_drop})']}")
+            self.reset()
         self.sim.forward()
+        # print(f"Dropping {self.place_to_drop}")
+        # time.sleep(5)
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.place_to_drop]][:3]))
         return obs, info
@@ -238,6 +245,7 @@ class ReachDropWrapper(gym.Wrapper):
         except:
             obs, reward, terminated, info = self.env.step(action)
         state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        state_dist = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=True)
         success = state[f"over(gripper,{self.place_to_drop})"] and state[f"grasped({self.obj_to_pick})"]
         info['is_sucess'] = success
         truncated = truncated or self.env.done
@@ -246,8 +254,11 @@ class ReachDropWrapper(gym.Wrapper):
             obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.place_to_drop]][:3]))
         else:
             obs = np.concatenate((obs, self.area_pos[self.place_to_drop]))
-        reward = 1 if success else 0
+        reward = -(state_dist[f'over(gripper,{self.place_to_drop})']) + 5*success
+        # print(reward)
+        # reward = 1 if success else 0
         self.step_count += 1
+        # self.env.render()
         if self.step_count > self.horizon:
             terminated = True
         return obs, reward, terminated, truncated, info

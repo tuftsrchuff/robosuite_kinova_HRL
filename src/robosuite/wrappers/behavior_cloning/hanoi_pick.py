@@ -3,6 +3,7 @@ import gymnasium as gym
 import robosuite as suite
 import numpy as np
 from robosuite.HRL_domain.detector import Detector
+import time
 
 controller_config = suite.load_controller_config(default_controller='OSC_POSITION')
 
@@ -182,10 +183,27 @@ class PickWrapper(gym.Wrapper):
                 if trials > 3:
                     break   
 
+        state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        while state[f'clear({self.obj_to_pick})'] == False:
+            # print("Invalid state, resetting...")
+            # print(f"Not clear {self.obj_to_pick} {state[f'clear({self.obj_to_pick})']}")
+            self.reset()
         self.sim.forward()
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
-        # print(self.obj_to_pick)
+
+
+        # print(f"Obj to pick {self.obj_to_pick}")
+        # state_dist = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=True)
+        # print("Groundings float w dist")
+        # print(state_dist)
+        # print("Groundings standard")
+        # state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        # print(state)
+        # time.sleep(10)
+
+        #Call reset again if the state isn't valid
+
         return obs, info
     
     def step(self, action):
@@ -208,15 +226,24 @@ class PickWrapper(gym.Wrapper):
             success = len(state.keys()) == 1 and state[f'grasped({self.obj_to_pick})']
         except KeyError:
             success = False
+        
+        picked = 0.0
         if success:
+            picked = 5.0
             print(state)
         info['is_sucess'] = success
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
         # reward = -state_dist[f"over(gripper,{self.place_to_drop})"] + success
-        reward = 1 if success else 0
+        # reward = 1 if success else 0
         self.step_count += 1
+        # print(f"Grab level {state_dist[f'at_grab_level(gripper,{self.obj_to_pick})']}")
+        # over(gripper,cube1)
+        # state_dist[f"over(gripper,{self.obj_to_pick})"]
+        # print(f"Pick level {state_dist[f'over(gripper,{self.obj_to_pick})']}")
+        reward = -(state_dist[f'at_grab_level(gripper,{self.obj_to_pick})'] + state_dist[f'over(gripper,{self.obj_to_pick})']) + picked
+        # print(reward)
         # self.env.render()
         if self.step_count > self.horizon:
             terminated = True

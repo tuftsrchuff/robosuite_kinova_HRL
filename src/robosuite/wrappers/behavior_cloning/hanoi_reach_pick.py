@@ -188,7 +188,11 @@ class ReachPickWrapper(gym.Wrapper):
                 reset = success
                 if trials > 3:
                     break   
-
+        state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        while state[f'clear({self.obj_to_pick})'] == False:
+            # print("Invalid state, resetting...")
+            # print(f"Not clear {self.obj_to_pick} {state[f'clear({self.obj_to_pick})']}")
+            self.reset()
         self.sim.forward()
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
@@ -214,8 +218,8 @@ class ReachPickWrapper(gym.Wrapper):
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
-        reward = -state_dist[f"over(gripper,{self.obj_to_pick})"]
-        # print(f"Reward {reward}")
+        reward = -state_dist[f"over(gripper,{self.obj_to_pick})"] + 5*success
+        # print(reward)
         # self.env.render()
         # time.sleep(5)
         self.step_count += 1

@@ -3,6 +3,7 @@ import gymnasium as gym
 import robosuite as suite
 import numpy as np
 from robosuite.HRL_domain.detector import Detector
+import time
 
 controller_config = suite.load_controller_config(default_controller='OSC_POSITION')
 
@@ -103,7 +104,7 @@ class DropWrapper(gym.Wrapper):
         # Set the task
         self.obj_to_pick = cube_to_pick
         self.place_to_drop = place_to_drop
-        print("Task: Pick {} and drop it on {}".format(self.obj_to_pick, self.place_to_drop))
+        # print("Task: Pick {} and drop it on {}".format(self.obj_to_pick, self.place_to_drop))
         return f"on({cube_to_pick},{place_to_drop})"
 
     def drop_reset(self):
@@ -247,9 +248,16 @@ class DropWrapper(gym.Wrapper):
                 if trials > 3:
                     break   
 
+        state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        while state[f'clear({self.place_to_drop})'] == False:
+            # print("Invalid state, resetting...")
+            # print(f"Not clear {self.place_to_drop} {state[f'clear({self.place_to_drop})']}")
+            self.reset()
         self.sim.forward()
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.place_to_drop]][:3]))
+        # self.env.render()
+        # time.sleep(5)
         return obs, info
     
     def step(self, action):
@@ -263,13 +271,21 @@ class DropWrapper(gym.Wrapper):
         except:
             obs, reward, terminated, info = self.env.step(action)
         state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        state_dist = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=True)
+
         success = state[f"on({self.obj_to_pick},{self.place_to_drop})"] and not state[f"grasped({self.obj_to_pick})"]
         info['is_sucess'] = success
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.place_to_drop]][:3]))
-        reward = 1 if success else 0
+        # print(state_dist)
+        reward = -(state_dist[f'over(gripper,{self.place_to_drop})']) + 5*success
+        # print(f'Pick: {self.obj_to_pick}   Drop: {self.place_to_drop}')
+        # print(reward)
+        # print(state[f'clear({self.place_to_drop})'])
+        # reward = 1 if success else 0
         self.step_count += 1
+        # self.env.render()
         if self.step_count > self.horizon:
             terminated = True
         return obs, reward, terminated, truncated, info
