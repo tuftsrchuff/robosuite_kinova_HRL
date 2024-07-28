@@ -199,6 +199,8 @@ class PickWrapper(gym.Wrapper):
             obs, reward, terminated, truncated, info = self.env.step(action)
         except:
             obs, reward, terminated, info = self.env.step(action)
+        
+        state_dist = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=True)
         state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
         # test if self.obj_to_pick (and only self.obj_to_pick) is grasped
         state = {k: state[k] for k in state.keys() if 'grasped' in k and state[k]}
@@ -212,6 +214,7 @@ class PickWrapper(gym.Wrapper):
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
+        # reward = -state_dist[f"over(gripper,{self.place_to_drop})"] + success
         reward = 1 if success else 0
         self.step_count += 1
         # self.env.render()
