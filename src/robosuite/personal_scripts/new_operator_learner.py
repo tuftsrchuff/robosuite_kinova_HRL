@@ -3,6 +3,7 @@ from executor_noHRL import Executor
 from robosuite.HRL_domain.domain_synapses import *
 from robosuite.wrappers.gym_wrapper import GymWrapper
 import time
+from learner import Learner
 
 def decomposeAction(action):
     print("Decomposing")
@@ -16,34 +17,31 @@ def decomposeAction(action):
     
 
 def executeAction(base_action, toMove, destination, env):
-
-    print(f"Taking action {base_action}")
-    #Post condition can be looked at here - toMove should be on destination
-    print(f"Reach-pick {toMove} to {destination}")
     # obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
     exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'reach_pick')
     success = executor.execute_policy(symgoal=toMove)
-    # print(f"Done: {done}")
+    print(f"Taking action {base_action}")
+    print(f"Reach-pick {toMove} to {destination}")
+    print(f"Success: {success}")
     time.sleep(5)
-    # print("Opening gripper...")
-    # for i in range(50):
-    #     obs,_,_,_,_ = exec_env.step([0,0,0,-1])
-    #     exec_env.render()
-    #     time.sleep(0.25)
-    
-    # print("Closing gripper...")
-    # for i in range(50):
-    #     obs,_,_,_,_= exec_env.step([0,0,0,1])
-    #     exec_env.render()
-    #     time.sleep(0.25)
+    if not success:
+        learner = Learner(env, "reach_pick")
+        learner.learn()
 
     #Terminated environment, use base env and rewrap?
     print(f"Pick {toMove}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'pick')
-    done = executor.execute_policy(symgoal=toMove)
+    success = executor.execute_policy(symgoal=toMove)
     time.sleep(5)
+    if not success:
+        print("Learning new operator")
+        learner = Learner(env, "pick")
+        learner.learn()
+        print("New operator learned")
+        time.sleep(5)
+        return
 
     print(f"Reach-drop {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
@@ -55,8 +53,6 @@ def executeAction(base_action, toMove, destination, env):
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'drop')
     done = executor.execute_policy(symgoal=[toMove,destination])
-
-
 
 
 

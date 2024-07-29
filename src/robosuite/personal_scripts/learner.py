@@ -13,10 +13,10 @@ from robosuite import load_controller_config
 from robosuite.HRL_domain.detector import Detector
 from robosuite.HRL_domain.domain_synapses import *
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.callbacks import CallbackList, StopTrainingOnNoModelImprovement
+from stable_baselines3.common.callbacks import EvalCallback, CallbackList, StopTrainingOnNoModelImprovement
 
 controller_config = load_controller_config(default_controller='OSC_POSITION')
-TRAINING_STEPS = 20000
+TRAINING_STEPS = 30000
 
 class Learner():
     def __init__(self, env, operator):
@@ -85,6 +85,11 @@ class Learner():
 
         callbacks = []
 
+        stop_train_callback = StopTrainingOnNoModelImprovement(max_no_improvement_evals=5000, min_evals=20000, verbose=1)
+
+        # eval_callback = EvalCallback(eval_env, eval_freq=1000, callback_after_eval=stop_train_callback, verbose=1)
+
+
 
         # Define the evaluation callback
         eval_callback = EvalCallback(
@@ -96,14 +101,14 @@ class Learner():
             deterministic=True,
             render=False,
             callback_on_new_best=None,
-            verbose=1
+            verbose=1,
+            callback_after_eval=stop_train_callback
         )
 
         callbacks.append(eval_callback)
 
-        stop_train_callback = StopTrainingOnNoModelImprovement(max_no_improvement_evals=5, min_evals=2, verbose=1)
 
-        callbacks.append(stop_train_callback)
+        # callbacks.append(stop_train_callback)
 
         # Train the model
         model.learn(
