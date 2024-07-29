@@ -223,12 +223,12 @@ class ReachDropWrapper(gym.Wrapper):
                 if trials > 3:
                     break   
         state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
-        while state[f'clear({self.place_to_drop})'] == False:
-            # print("Invalid state, resetting...")
-            # print(f"Not clear {self.place_to_drop} {state[f'clear({self.place_to_drop})']}")
-            self.reset()
+        # while state[f'clear({self.place_to_drop})'] == False:
+        #     print("Invalid state, resetting...")
+        #     print(f"Not clear {self.place_to_drop} {state[f'clear({self.place_to_drop})']}")
+            # self.reset()
         self.sim.forward()
-        # print(f"Dropping {self.place_to_drop}")
+        # print(f"Dropping {self.obj_to_pick} on {self.place_to_drop}")
         # time.sleep(5)
         # replace the goal object id with its array of x, y, z location
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.place_to_drop]][:3]))

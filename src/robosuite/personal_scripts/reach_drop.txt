@@ -1,0 +1,51 @@
+What policy would you like to train?
+	1. Reach-pick
+	2. Pick
+	3. Drop
+	4. Reach-drop
+	5. All
+Training for 500000 steps
+Training ReachDrop
+Using cuda device
+Wrapping the env in a DummyVecEnv.
+Logging to ./logs/SAC_39
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | -13      |
+| time/              |          |
+|    episodes        | 4        |
+|    fps             | 44       |
+|    time_elapsed    | 44       |
+|    total_timesteps | 2000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | -12.1    |
+| time/              |          |
+|    episodes        | 8        |
+|    fps             | 50       |
+|    time_elapsed    | 79       |
+|    total_timesteps | 4000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | -12.4    |
+| time/              |          |
+|    episodes        | 12       |
+|    fps             | 55       |
+|    time_elapsed    | 108      |
+|    total_timesteps | 6000     |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | -12.3    |
+| time/              |          |
+|    episodes        | 16       |
+|    fps             | 58       |
+|    time_elapsed    | 135      |
+|    total_timesteps | 8000     |
+---------------------------------

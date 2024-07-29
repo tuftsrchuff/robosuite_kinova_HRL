@@ -15,7 +15,7 @@ from robosuite import load_controller_config
 
 controller_config = load_controller_config(default_controller='OSC_POSITION')
 
-TRAINING_STEPS = 1000000
+TRAINING_STEPS = 500000
 
 
 def train_reach_pick(env, eval_env):
@@ -217,8 +217,8 @@ def train_all():
     # env, eval_env = create_envs()
     # train_reach_pick(env, eval_env)
     
-    env, eval_env = create_envs()
-    train_pick(env, eval_env)
+    # env, eval_env = create_envs()
+    # train_pick(env, eval_env)
 
     env, eval_env = create_envs()
     train_drop(env, eval_env)
