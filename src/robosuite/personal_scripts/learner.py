@@ -14,9 +14,12 @@ from robosuite.HRL_domain.detector import Detector
 from robosuite.HRL_domain.domain_synapses import *
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback, CallbackList, StopTrainingOnNoModelImprovement
+import time
 
 controller_config = load_controller_config(default_controller='OSC_POSITION')
-TRAINING_STEPS = 30000
+TRAINING_STEPS = 500000
+
+    
 
 class Learner():
     def __init__(self, env, operator):
@@ -78,14 +81,14 @@ class Learner():
             gamma=0.99,
             policy_kwargs=dict(net_arch=[256, 256]),
             verbose=1,
-            tensorboard_log='./logs/'
+            tensorboard_log=f"./sac_novelty_{self.operator}_tensorboard/"
         )
 
         self.eval_env = Monitor(self.eval_env, filename=None, allow_early_resets=True)
 
         callbacks = []
 
-        stop_train_callback = StopTrainingOnNoModelImprovement(max_no_improvement_evals=5000, min_evals=20000, verbose=1)
+        stop_train_callback = StopTrainingOnNoModelImprovement(max_no_improvement_evals=5000, min_evals=15000, verbose=1)
 
         # eval_callback = EvalCallback(eval_env, eval_freq=1000, callback_after_eval=stop_train_callback, verbose=1)
 
@@ -121,4 +124,6 @@ class Learner():
         model.save(os.path.join(f'./models/{self.operator}_postfail'))
 
         executors[self.operator] = f'./models/{self.operator}_postfail.zip'
+        print("Executor files...")
+        time.sleep(5)
 

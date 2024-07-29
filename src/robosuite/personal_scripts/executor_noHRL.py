@@ -16,29 +16,9 @@ class Executor():
 
         populateExecutorInfo(env)
 
-        # #Domain synapses here on down
-        # self.cube1_body = self.env.sim.model.body_name2id('cube1_main')
-        # self.cube2_body = self.env.sim.model.body_name2id('cube2_main')
-        # self.cube3_body = self.env.sim.model.body_name2id('cube3_main')
-        # self.peg1_body = self.env.sim.model.body_name2id('peg1_main')
-        # self.peg2_body = self.env.sim.model.body_name2id('peg2_main')
-        # self.peg3_body = self.env.sim.model.body_name2id('peg3_main')
-
-        # self.obj_mapping = {'cube1': self.cube1_body, 
-        #                     'cube2': self.cube2_body, 
-        #                     'cube3': self.cube3_body, 
-        #                     'peg1': self.peg1_body, 
-        #                     'peg2': self.peg2_body, 
-        #                     'peg3': self.peg3_body}
-        
-
-        # self.area_pos = {'peg1': env.pegs_xy_center[0], 'peg2': env.pegs_xy_center[1], 'peg3': env.pegs_xy_center[2]}
-
     
     def execute_policy(self,
-                       symgoal = None,
-                       plan=None,
-                       planID=None):
+                       symgoal = None):
 
 
         done = False
@@ -69,9 +49,6 @@ class Executor():
         #Need to pass in initial observation somehow        
         while not done and not terminated:
             action, _states = model.predict(obs)
-            # if self.operator == 'reach_pick':
-            #     action[3] = 0
-                # print(action)
             obs, reward, terminated, truncated, info = self.env.step(action)
 
             #addGoal
@@ -88,7 +65,6 @@ class Executor():
         print(f"Done: {done}")
         # comparing execution effects to expected effects
         new_state = self.detector.get_groundings(self.env)
-        print(new_state)
 
 
         expected_effects_keys = effects(self.operator, symgoal)

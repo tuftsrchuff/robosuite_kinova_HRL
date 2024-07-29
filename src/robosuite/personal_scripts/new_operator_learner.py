@@ -34,6 +34,7 @@ def executeAction(base_action, toMove, destination, env):
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'pick')
     success = executor.execute_policy(symgoal=toMove)
+    print(f"Success: {success}")
     time.sleep(5)
     if not success:
         print("Learning new operator")
@@ -46,13 +47,29 @@ def executeAction(base_action, toMove, destination, env):
     print(f"Reach-drop {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'reach_drop')
-    done = executor.execute_policy(symgoal=[toMove,destination])
+    success = executor.execute_policy(symgoal=[toMove,destination])
+    print(f"Success: {success}")
     time.sleep(5)
+    if not success:
+        print("Learning new operator")
+        learner = Learner(env, "reach_drop")
+        learner.learn()
+        print("New operator learned")
+        time.sleep(5)
+        return
 
     print(f"Dropping {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'drop')
-    done = executor.execute_policy(symgoal=[toMove,destination])
+    success = executor.execute_policy(symgoal=[toMove,destination])
+    print(f"Success: {success}")
+    if not success:
+        print("Learning new operator")
+        learner = Learner(env, "drop")
+        learner.learn()
+        print("New operator learned")
+        time.sleep(5)
+        return
 
 
 
