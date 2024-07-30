@@ -64,7 +64,7 @@ if __name__ == "__main__":
     pddl_dir = "../PDDL"
     domain_dir = "Domains"
     problem_dir = "Problems"
-    domain = "domain"
+    domain = "domain_v2"
     problem = "problem"
 
     domain_path = pddl_dir + os.sep + domain + ".pddl"
@@ -74,9 +74,9 @@ if __name__ == "__main__":
 
     
     plan, game_action_set = call_planner(domain_path, problem_path)
-    for action in plan:
-        base_action, toMove, destination = decomposeAction(action)
-        executeAction(base_action, toMove, destination, env)
+    # for action in plan:
+    #     base_action, toMove, destination = decomposeAction(action)
+    #     executeAction(base_action, toMove, destination, env)
     print(plan)
     #First call planner and return the plan
     #Plan - ['MOVE D1 D2 PEG2', 'MOVE D2 D3 PEG3', 'MOVE D1 PEG2 D2', 'MOVE D3 D4 PEG2', 'MOVE D1 D2 D4', 'MOVE D2 PEG3 D3', 'MOVE D1 D4 D2', 'MOVE D4 PEG1 PEG3', 'MOVE D1 D2 D4', 'MOVE D2 D3 PEG1', 'MOVE D1 D4 D2', 'MOVE D3 PEG2 D4', 'MOVE D1 D2 PEG2', 'MOVE D2 PEG1 D3', 'MOVE D1 PEG2 D2']

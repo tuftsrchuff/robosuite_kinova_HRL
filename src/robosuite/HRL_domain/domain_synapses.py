@@ -1,5 +1,4 @@
 import robosuite as suite
-from robosuite.HRL_domain.joint_friction import JointNovelty
 from robosuite.HRL_domain.detector import Detector
 import numpy as np
 from robosuite import load_controller_config
@@ -57,10 +56,6 @@ def populateExecutorInfo(env):
 
         area_pos = {'peg1': env.pegs_xy_center[0], 'peg2': env.pegs_xy_center[1], 'peg3': env.pegs_xy_center[2]}
 
-
-novelties_info = {
-    "joint_friction": {"wrapper":JointNovelty, "params": None, "type":"global"}
-}
 
 
 
