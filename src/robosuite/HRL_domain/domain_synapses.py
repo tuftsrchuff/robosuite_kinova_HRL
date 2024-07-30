@@ -8,8 +8,8 @@ controller_config = load_controller_config(default_controller='OSC_POSITION')
 
 executors = {
      'pick': './models/Pick/best_model.zip',
-     'drop': './models/Drop/best_model.zip',
-     'reach_drop': './models/ReachDrop/best_model.zip',
+     'drop': './models/drop_sac.zip',
+     'reach_drop': './models/reachdrop_sac.zip',
      'reach_pick': './models/ReachPick/best_model.zip'
 }
 
