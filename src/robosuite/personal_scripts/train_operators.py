@@ -50,7 +50,7 @@ def train_reach_pick(env, eval_env):
 
     #environment got invalid action dimension -- expected 8, got 4
     check_env(env)
-    env = Monitor(env, filename=None, allow_early_resets=True)
+    env = Monitor(env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
 
     model = SAC(
         'MlpPolicy',
@@ -69,7 +69,7 @@ def train_reach_pick(env, eval_env):
     eval_env = ReachPickWrapper(eval_env)
     eval_env = Monitor(eval_env, filename=None, allow_early_resets=True, info_keywords=("is_success"))
 
-    buffer = BufferCallback(path='./models/ReachPick/buffer')
+    buffer = BufferCallback(path=f'./models/ReachPick/{ITERATION}/buffer')
 
     # Define the evaluation callback
     eval_callback = EvalCallback(
@@ -92,15 +92,15 @@ def train_reach_pick(env, eval_env):
     )
 
     # Save the model
-    model.save(os.path.join('./models/reachpick_sac'))
-    model.save_replay_buffer("/models/reachpick_sac_replay_buffer")
+    model.save(os.path.join(f'./models/ReachPick/{ITERATION}/full/reachpick_sac'))
+    model.save_replay_buffer(f"/models/ReachPick/{ITERATION}/full/reachpick_sac_replay_buffer")
 
 def train_pick(env, eval_env):
     print("Training Pick")
     #Wrap environment in the wrapper, try to train
     env = PickWrapper(env)
     check_env(env)
-    env = Monitor(env, filename=None, allow_early_resets=True)
+    env = Monitor(env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
 
 
     model = SAC(
@@ -114,22 +114,24 @@ def train_pick(env, eval_env):
         gamma=0.99,
         policy_kwargs=dict(net_arch=[256, 256]),
         verbose=1,
-        tensorboard_log='./logs/'
+        tensorboard_log='./logs/Pick/'
     )
 
     eval_env = PickWrapper(eval_env)
-    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True)
+    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
+
+    buffer = BufferCallback(path=f'./models/Pick/{ITERATION}/buffer')
 
     # Define the evaluation callback
     eval_callback = EvalCallback(
         eval_env,
-        best_model_save_path='./models/Pick',
-        log_path='./logs/',
+        best_model_save_path=f'./models/Pick/{ITERATION}/',
+        log_path='./logs/Pick/',
         eval_freq=10000,
         n_eval_episodes=10,
         deterministic=True,
         render=False,
-        callback_on_new_best=None,
+        callback_on_new_best=buffer,
         verbose=1
     )
 
@@ -141,8 +143,8 @@ def train_pick(env, eval_env):
     )
 
     # Save the model
-    model.save(os.path.join('./models/pick_sac'))
-    model.save_replay_buffer("/models/pick_sac_replay_buffer")
+    model.save(os.path.join(f'./models/Pick/{ITERATION}/full/pick_sac'))
+    model.save_replay_buffer(f"/models/Pick/{ITERATION}/full/pick_sac_replay_buffer")
 
 
 
@@ -151,7 +153,7 @@ def train_drop(env, eval_env):
     #Wrap environment in the wrapper, try to train
     env = DropWrapper(env)
     check_env(env)
-    env = Monitor(env, filename=None, allow_early_resets=True)
+    env = Monitor(env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
 
 
     model = SAC(
@@ -165,24 +167,27 @@ def train_drop(env, eval_env):
         gamma=0.99,
         policy_kwargs=dict(net_arch=[256, 256]),
         verbose=1,
-        tensorboard_log='./logs/'
+        tensorboard_log='./logs/Drop/'
     )
 
     eval_env = DropWrapper(eval_env)
-    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True)
+    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
+
+    buffer = BufferCallback(path=f'./models/Drop/{ITERATION}/buffer')
 
     # Define the evaluation callback
     eval_callback = EvalCallback(
         eval_env,
-        best_model_save_path='./models/Drop',
-        log_path='./logs/',
+        best_model_save_path=f'./models/Drop/{ITERATION}/',
+        log_path='./logs/Drop/',
         eval_freq=10000,
         n_eval_episodes=10,
         deterministic=True,
         render=False,
-        callback_on_new_best=None,
+        callback_on_new_best=buffer,
         verbose=1
     )
+
 
     # Train the model
     model.learn(
@@ -192,8 +197,9 @@ def train_drop(env, eval_env):
     )
 
     # Save the model
-    model.save(os.path.join('./models/drop_sac'))
-    model.save_replay_buffer("/models/drop_sac_replay_buffer")
+    model.save(os.path.join(f'./models/Drop/{ITERATION}/full/drop_sac'))
+    model.save_replay_buffer(f"/models/Drop/{ITERATION}/full/drop_sac_replay_buffer")
+
 
 def train_reach_drop(env, eval_env):
     print("Training ReachDrop")
@@ -213,7 +219,7 @@ def train_reach_drop(env, eval_env):
         gamma=0.99,
         policy_kwargs=dict(net_arch=[256, 256]),
         verbose=1,
-        tensorboard_log='./logs/'
+        tensorboard_log='./logs/ReachDrop/'
     )
 
     eval_env = ReachDropWrapper(eval_env)
@@ -225,7 +231,7 @@ def train_reach_drop(env, eval_env):
     eval_callback = EvalCallback(
         eval_env,
         best_model_save_path=f'./models/ReachDrop/{ITERATION}/',
-        log_path='./logs/',
+        log_path='./logs/ReachDrop/',
         eval_freq=10000,
         n_eval_episodes=10,
         deterministic=True,

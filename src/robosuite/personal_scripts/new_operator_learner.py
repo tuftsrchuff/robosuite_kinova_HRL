@@ -14,20 +14,21 @@ def decomposeAction(action):
     destination = components[3]
     return base_action, toMove, destination
     
-    
 
 def executeAction(base_action, toMove, destination, env):
     # obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
+    #ignore_done=False - used in the environment which gym wrapper calls, maybe pass into 
     exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
-    executor = Executor(exec_env, 'reach_pick')
-    success = executor.execute_policy(symgoal=toMove)
+
+
+    #Try to perform operator then pass back success or not on operator
     print(f"Taking action {base_action}")
     print(f"Reach-pick {toMove} to {destination}")
+    executor = Executor(exec_env, 'reach_pick')
+    success = executor.execute_policy(symgoal=toMove)
     print(f"Success: {success}")
-    time.sleep(5)
     if not success:
-        learner = Learner(env, "reach_pick")
-        learner.learn()
+        return success, 'reach_pick'
 
     #Terminated environment, use base env and rewrap?
     print(f"Pick {toMove}")
@@ -35,28 +36,16 @@ def executeAction(base_action, toMove, destination, env):
     executor = Executor(exec_env, 'pick')
     success = executor.execute_policy(symgoal=toMove)
     print(f"Success: {success}")
-    time.sleep(5)
     if not success:
-        print("Learning new operator")
-        learner = Learner(env, "pick")
-        learner.learn()
-        print("New operator learned")
-        time.sleep(5)
-        return
+        return success, 'pick'
 
     print(f"Reach-drop {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'reach_drop')
     success = executor.execute_policy(symgoal=[toMove,destination])
     print(f"Success: {success}")
-    time.sleep(5)
     if not success:
-        print("Learning new operator")
-        learner = Learner(env, "reach_drop")
-        learner.learn()
-        print("New operator learned")
-        time.sleep(5)
-        return
+        return success, 'reach_drop'
 
     print(f"Dropping {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
@@ -64,13 +53,17 @@ def executeAction(base_action, toMove, destination, env):
     success = executor.execute_policy(symgoal=[toMove,destination])
     print(f"Success: {success}")
     if not success:
-        print("Learning new operator")
-        learner = Learner(env, "drop")
-        learner.learn()
-        print("New operator learned")
-        time.sleep(5)
-        return
+        return success, 'drop'
+    else:
+        return success, None
 
+
+def call_learner(operator, env):
+    print(f"Learning new operator {operator}")
+    learner = Learner(env, operator)
+    learner.learn()
+    print("New operator learned")
+    time.sleep(5)
 
 
 if __name__ == "__main__":
@@ -83,39 +76,40 @@ if __name__ == "__main__":
     domain_path = pddl_dir + os.sep + domain + ".pddl"
     problem_path = pddl_dir + os.sep + problem + ".pddl"
     print("Solving tower of Hanoi task")
-    env = create_env("ReachPick")
 
-    
+    env = suite.make(
+        env_name="Hanoi",
+        robots="Kinova3", 
+        has_renderer=True,
+        has_offscreen_renderer=False,
+        use_camera_obs=False,
+        # render_camera="agentview",
+        controller_configs=controller_config,
+        ignore_done=True
+    )
+
+    #Full plan execution with normal environment
+
+    plan, game_action_set = call_planner(domain_path, problem_path)
+    for action in plan:
+        base_action, toMove, destination = decomposeAction(action)
+        success, operator = executeAction(base_action, toMove, destination, env)
+        if not success:
+            call_learner(operator, env)
+            success, operator = executeAction(base_action, toMove, destination, env)
+
+
+    #Novelty injection
+    env = suite.make(
+            env_name="DoorNovelty",
+            robots="Kinova3", 
+            has_renderer=True,
+            has_offscreen_renderer=False,
+            use_camera_obs=False,
+            render_camera="agentview",
+            controller_configs=controller_config
+        )
     plan, game_action_set = call_planner(domain_path, problem_path)
     for action in plan:
         base_action, toMove, destination = decomposeAction(action)
         executeAction(base_action, toMove, destination, env)
-    print(plan)
-    #First call planner and return the plan
-    #Plan - ['MOVE D1 D2 PEG2', 'MOVE D2 D3 PEG3', 'MOVE D1 PEG2 D2', 'MOVE D3 D4 PEG2', 'MOVE D1 D2 D4', 'MOVE D2 PEG3 D3', 'MOVE D1 D4 D2', 'MOVE D4 PEG1 PEG3', 'MOVE D1 D2 D4', 'MOVE D2 D3 PEG1', 'MOVE D1 D4 D2', 'MOVE D3 PEG2 D4', 'MOVE D1 D2 PEG2', 'MOVE D2 PEG1 D3', 'MOVE D1 PEG2 D2']
-    
-    #Load in the domain synapse information here - will have obj body mapping
-    
-    #Run executor until it's done, done state can be checked in detector? If block 2 on 3, etc
-        # MOVE D1 D2 PEG2
-        # Reach-pick d1
-        # Pick d1
-        # reach drop peg2
-        # drop peg2
-    
-    #Decompose task, reach-pick d1, pick d1, reach-drop peg2, drop peg2
-        
-
-    #Then create simple executor that just executes full policy
-        #What would the pre and post conditions be?
-            #Specified in the plan itself
-        #Check pre and post conditions
-    
-
-    #Append the observation with the goal
-
-    #Execute full policy for plan step
-
-    #Optimal if you could watch this all happen
-        #Success/failure message
-        #Is the disk on the desired block? Should be able to see it happen

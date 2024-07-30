@@ -83,8 +83,11 @@ class Executor():
         print(f"Expected effects {expected_effects}")
         print(f"Execution efects {execution_effects}")
 
-
-        success = (all(x in execution_effects for x in expected_effects))
+        success = True
+        for i, val in enumerate(execution_effects):
+            if expected_effects[i] != val:
+                success = False
+                break
         if success:
             return True
         else:

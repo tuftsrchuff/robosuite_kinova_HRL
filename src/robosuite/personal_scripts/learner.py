@@ -17,7 +17,7 @@ from stable_baselines3.common.callbacks import EvalCallback, CallbackList, StopT
 import time
 
 controller_config = load_controller_config(default_controller='OSC_POSITION')
-TRAINING_STEPS = 500000
+TRAINING_STEPS = 1000
 
     
 
@@ -90,8 +90,6 @@ class Learner():
 
         stop_train_callback = StopTrainingOnNoModelImprovement(max_no_improvement_evals=5000, min_evals=15000, verbose=1)
 
-        # eval_callback = EvalCallback(eval_env, eval_freq=1000, callback_after_eval=stop_train_callback, verbose=1)
-
 
 
         # Define the evaluation callback
@@ -122,8 +120,9 @@ class Learner():
 
         # Save the model
         model.save(os.path.join(f'./models/{self.operator}_postfail'))
+        model.save_replay_buffer(f'./models/{self.operator}_postfail_buffer')
 
         executors[self.operator] = f'./models/{self.operator}_postfail.zip'
-        print("Executor files...")
+        print(f"Executor file location {executors[self.operator]}")
         time.sleep(5)
 
