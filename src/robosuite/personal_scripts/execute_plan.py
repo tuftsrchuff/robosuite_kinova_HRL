@@ -24,37 +24,40 @@ def executeAction(base_action, toMove, destination, env):
     exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'reach_pick')
     success = executor.execute_policy(symgoal=toMove)
-    # print(f"Done: {done}")
-    time.sleep(5)
-    # print("Opening gripper...")
-    # for i in range(50):
-    #     obs,_,_,_,_ = exec_env.step([0,0,0,-1])
-    #     exec_env.render()
-    #     time.sleep(0.25)
-    
-    # print("Closing gripper...")
-    # for i in range(50):
-    #     obs,_,_,_,_= exec_env.step([0,0,0,1])
-    #     exec_env.render()
-    #     time.sleep(0.25)
+    if not success:
+        print("Reach pick failed")
+        return False
+    # time.sleep(5)
 
     #Terminated environment, use base env and rewrap?
     print(f"Pick {toMove}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'pick')
-    done = executor.execute_policy(symgoal=toMove)
-    time.sleep(5)
+    success = executor.execute_policy(symgoal=toMove)
+    if not success:
+        print("Pick failed")
+        return False
+    # time.sleep(5)
 
     print(f"Reach-drop {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'reach_drop')
-    done = executor.execute_policy(symgoal=[toMove,destination])
-    time.sleep(5)
+    success = executor.execute_policy(symgoal=[toMove,destination])
+    if not success:
+        print("Reach drop failed")
+        return False
+    # time.sleep(5)
 
     print(f"Dropping {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
     executor = Executor(exec_env, 'drop')
-    done = executor.execute_policy(symgoal=[toMove,destination])
+    success = executor.execute_policy(symgoal=[toMove,destination])
+    if not success:
+        print("Drop failed")
+        return False
+    else:
+        print(f"Action {base_action} {toMove} onto {destination} finished successfully")
+        return True
 
 
 
@@ -74,10 +77,16 @@ if __name__ == "__main__":
 
     
     plan, game_action_set = call_planner(domain_path, problem_path)
+    print(plan)
+    # plan = ['MOVE CUBE1 CUBE2 PEG2', 'MOVE CUBE2 CUBE3 PEG3', 'MOVE CUBE1 PEG2 CUBE2', 'MOVE CUBE3 PEG1 PEG2', 'MOVE CUBE1 CUBE2 PEG1', 'MOVE CUBE2 PEG3 CUBE3', 'MOVE CUBE1 PEG1 CUBE2']
+
     # for action in plan:
     #     base_action, toMove, destination = decomposeAction(action)
-    #     executeAction(base_action, toMove, destination, env)
-    print(plan)
+    #     success = executeAction(base_action, toMove, destination, env)
+    #     if not success:
+    #         print("Plan failed")
+    #         break
+    # print(plan)
     #First call planner and return the plan
     #Plan - ['MOVE D1 D2 PEG2', 'MOVE D2 D3 PEG3', 'MOVE D1 PEG2 D2', 'MOVE D3 D4 PEG2', 'MOVE D1 D2 D4', 'MOVE D2 PEG3 D3', 'MOVE D1 D4 D2', 'MOVE D4 PEG1 PEG3', 'MOVE D1 D2 D4', 'MOVE D2 D3 PEG1', 'MOVE D1 D4 D2', 'MOVE D3 PEG2 D4', 'MOVE D1 D2 PEG2', 'MOVE D2 PEG1 D3', 'MOVE D1 PEG2 D2']
     

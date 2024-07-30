@@ -45,9 +45,9 @@ class Executor():
         Beta = termination_indicator(self.operator)
         terminated = False
         print(symgoal)
-        state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
-        print(state)
-        time.sleep(5)
+        # state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
+        # print(state)
+        # time.sleep(5)
 
         #Need to pass in initial observation somehow        
         while not done and not terminated:

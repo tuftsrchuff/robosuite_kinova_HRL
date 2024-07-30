@@ -214,7 +214,7 @@ class ReachPickWrapper(gym.Wrapper):
         state = self.detector.get_groundings(as_dict=True, binary_to_float=False, return_distance=False)
         
         success = state[f"over(gripper,{self.obj_to_pick})"]
-        info['is_sucess'] = success
+        info['is_success'] = success
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))

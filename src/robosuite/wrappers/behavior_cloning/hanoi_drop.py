@@ -274,7 +274,7 @@ class DropWrapper(gym.Wrapper):
         state_dist = self.detector.get_groundings(as_dict=True, binary_to_float=True, return_distance=True)
 
         success = state[f"on({self.obj_to_pick},{self.place_to_drop})"] and not state[f"grasped({self.obj_to_pick})"]
-        info['is_sucess'] = success
+        info['is_success'] = success
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.place_to_drop]][:3]))

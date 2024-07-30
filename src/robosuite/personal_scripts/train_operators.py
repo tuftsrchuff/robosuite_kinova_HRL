@@ -9,13 +9,38 @@ import os
 from stable_baselines3.common.env_checker import check_env
 from robosuite.wrappers.gym_wrapper import GymWrapper
 from stable_baselines3 import PPO, SAC
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import EvalCallback, BaseCallback
 from stable_baselines3.common.monitor import Monitor
 from robosuite import load_controller_config
+import time
 
 controller_config = load_controller_config(default_controller='OSC_POSITION')
 
-TRAINING_STEPS = 500000
+TRAINING_STEPS = 1000000
+ITERATION = 1
+
+class BufferCallback(BaseCallback):
+    """
+    A custom callback that derives from ``BaseCallback``.
+
+    :param verbose: Verbosity level: 0 for no output, 1 for info messages, 2 for debug messages
+    """
+    def __init__(self, verbose: int = 0, path=None):
+        super().__init__(verbose)
+        # self.model = None 
+        self.path = path
+
+    def _on_step(self) -> bool:
+        """
+        This method will be called by the model after each call to `env.step()`.
+
+        For child callback (of an `EventCallback`), this will be called
+        when the event is triggered.
+
+        :return: If the callback returns False, training is aborted early.
+        """
+        self.model.save_replay_buffer(self.path)
+        return True
 
 
 def train_reach_pick(env, eval_env):
@@ -42,7 +67,9 @@ def train_reach_pick(env, eval_env):
     )
 
     eval_env = ReachPickWrapper(eval_env)
-    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True)
+    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True, info_keywords=("is_success"))
+
+    buffer = BufferCallback(path='./models/ReachPick/buffer')
 
     # Define the evaluation callback
     eval_callback = EvalCallback(
@@ -53,7 +80,7 @@ def train_reach_pick(env, eval_env):
         n_eval_episodes=10,
         deterministic=True,
         render=False,
-        callback_on_new_best=None,
+        callback_on_new_best=buffer,
         verbose=1
     )
 
@@ -66,6 +93,7 @@ def train_reach_pick(env, eval_env):
 
     # Save the model
     model.save(os.path.join('./models/reachpick_sac'))
+    model.save_replay_buffer("/models/reachpick_sac_replay_buffer")
 
 def train_pick(env, eval_env):
     print("Training Pick")
@@ -114,6 +142,7 @@ def train_pick(env, eval_env):
 
     # Save the model
     model.save(os.path.join('./models/pick_sac'))
+    model.save_replay_buffer("/models/pick_sac_replay_buffer")
 
 
 
@@ -164,13 +193,14 @@ def train_drop(env, eval_env):
 
     # Save the model
     model.save(os.path.join('./models/drop_sac'))
+    model.save_replay_buffer("/models/drop_sac_replay_buffer")
 
 def train_reach_drop(env, eval_env):
     print("Training ReachDrop")
     #Wrap environment in the wrapper, try to train
     env = ReachDropWrapper(env)
     check_env(env)
-    env = Monitor(env, filename=None, allow_early_resets=True)
+    env = Monitor(env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
 
     model = SAC(
         'MlpPolicy',
@@ -187,18 +217,20 @@ def train_reach_drop(env, eval_env):
     )
 
     eval_env = ReachDropWrapper(eval_env)
-    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True)
+    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
+
+    buffer = BufferCallback(path=f'./models/ReachDrop/{ITERATION}/buffer')
 
     # Define the evaluation callback
     eval_callback = EvalCallback(
         eval_env,
-        best_model_save_path='./models/ReachDrop',
+        best_model_save_path=f'./models/ReachDrop/{ITERATION}/',
         log_path='./logs/',
         eval_freq=10000,
         n_eval_episodes=10,
         deterministic=True,
         render=False,
-        callback_on_new_best=None,
+        callback_on_new_best=buffer,
         verbose=1
     )
 
@@ -210,7 +242,8 @@ def train_reach_drop(env, eval_env):
     )
 
     # Save the model
-    model.save(os.path.join('./models/reachdrop_sac'))
+    model.save(os.path.join(f'./models/ReachDrop/{ITERATION}/full/reachdrop_sac'))
+    model.save_replay_buffer(f"./models/ReachDrop/{ITERATION}/full/reachdrop_sac_replay_buffer")
 
 def train_all():
     print("Training all")

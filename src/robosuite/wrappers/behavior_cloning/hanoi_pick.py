@@ -231,7 +231,7 @@ class PickWrapper(gym.Wrapper):
         if success:
             picked = 5.0
             print(state)
-        info['is_sucess'] = success
+        info['is_success'] = success
         truncated = truncated or self.env.done
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
