@@ -165,7 +165,7 @@ class Detector:
             combined_objs = self.objects + self.object_areas
             for gripper in ['gripper']:
                 for obj in combined_objs:
-                    print(f"Objects {combined_objs}")
+                    # print(f"Objects {combined_objs}")
                     at_grab_level_value = self.at_grab_level(gripper, obj, return_distance=return_distance)
                     if return_distance:
                         at_grab_level_value = at_grab_level_value / self.max_distance

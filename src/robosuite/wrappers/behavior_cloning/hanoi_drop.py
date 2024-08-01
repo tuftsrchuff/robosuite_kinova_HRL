@@ -279,8 +279,8 @@ class DropWrapper(gym.Wrapper):
         terminated = terminated or success
         obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.place_to_drop]][:3]))
         # print(state_dist)
-        reward = -(state_dist[f'over(gripper,{self.place_to_drop})']) + 5*success
-        # print(f'Pick: {self.obj_to_pick}   Drop: {self.place_to_drop}')
+        reward = -(state_dist[f'over(gripper,{self.place_to_drop})'] + state_dist[f'at_grab_level(gripper,{self.place_to_drop})']) + 5*success
+        # print(f'Drop: {self.place_to_drop}')
         # print(reward)
         # print(state[f'clear({self.place_to_drop})'])
         # reward = 1 if success else 0

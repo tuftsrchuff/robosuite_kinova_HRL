@@ -67,7 +67,7 @@ if __name__ == "__main__":
     pddl_dir = "../PDDL"
     domain_dir = "Domains"
     problem_dir = "Problems"
-    domain = "domain_v2"
+    domain = "domain"
     problem = "problem"
 
     domain_path = pddl_dir + os.sep + domain + ".pddl"
@@ -80,12 +80,12 @@ if __name__ == "__main__":
     print(plan)
     # plan = ['MOVE CUBE1 CUBE2 PEG2', 'MOVE CUBE2 CUBE3 PEG3', 'MOVE CUBE1 PEG2 CUBE2', 'MOVE CUBE3 PEG1 PEG2', 'MOVE CUBE1 CUBE2 PEG1', 'MOVE CUBE2 PEG3 CUBE3', 'MOVE CUBE1 PEG1 CUBE2']
 
-    # for action in plan:
-    #     base_action, toMove, destination = decomposeAction(action)
-    #     success = executeAction(base_action, toMove, destination, env)
-    #     if not success:
-    #         print("Plan failed")
-    #         break
+    for action in plan:
+        base_action, toMove, destination = decomposeAction(action)
+        success = executeAction(base_action, toMove, destination, env)
+        if not success:
+            print("Plan failed")
+            break
     # print(plan)
     #First call planner and return the plan
     #Plan - ['MOVE D1 D2 PEG2', 'MOVE D2 D3 PEG3', 'MOVE D1 PEG2 D2', 'MOVE D3 D4 PEG2', 'MOVE D1 D2 D4', 'MOVE D2 PEG3 D3', 'MOVE D1 D4 D2', 'MOVE D4 PEG1 PEG3', 'MOVE D1 D2 D4', 'MOVE D2 D3 PEG1', 'MOVE D1 D4 D2', 'MOVE D3 PEG2 D4', 'MOVE D1 D2 PEG2', 'MOVE D2 PEG1 D3', 'MOVE D1 PEG2 D2']

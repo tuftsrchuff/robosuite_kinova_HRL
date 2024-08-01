@@ -54,6 +54,7 @@ def train_reach_drop(env, eval_env):
     env = Monitor(env, filename=None, allow_early_resets=True)
 
     model = SAC.load("./models/reachdroptest_sac.zip", env=env)
+    #Load replay buffer
     print("Loaded model")
     print(f"Training for {TRAINING_STEPS}")
 

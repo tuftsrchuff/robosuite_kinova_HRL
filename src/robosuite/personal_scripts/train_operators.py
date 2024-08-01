@@ -17,7 +17,7 @@ import time
 controller_config = load_controller_config(default_controller='OSC_POSITION')
 
 TRAINING_STEPS = 1000000
-ITERATION = 1
+ITERATION = 2
 
 class BufferCallback(BaseCallback):
     """
@@ -93,7 +93,7 @@ def train_reach_pick(env, eval_env):
 
     # Save the model
     model.save(os.path.join(f'./models/ReachPick/{ITERATION}/full/reachpick_sac'))
-    model.save_replay_buffer(f"/models/ReachPick/{ITERATION}/full/reachpick_sac_replay_buffer")
+    model.save_replay_buffer(f"./models/ReachPick/{ITERATION}/full/reachpick_sac_replay_buffer")
 
 def train_pick(env, eval_env):
     print("Training Pick")
@@ -144,7 +144,7 @@ def train_pick(env, eval_env):
 
     # Save the model
     model.save(os.path.join(f'./models/Pick/{ITERATION}/full/pick_sac'))
-    model.save_replay_buffer(f"/models/Pick/{ITERATION}/full/pick_sac_replay_buffer")
+    model.save_replay_buffer(f"./models/Pick/{ITERATION}/full/pick_sac_replay_buffer")
 
 
 
@@ -198,7 +198,7 @@ def train_drop(env, eval_env):
 
     # Save the model
     model.save(os.path.join(f'./models/Drop/{ITERATION}/full/drop_sac'))
-    model.save_replay_buffer(f"/models/Drop/{ITERATION}/full/drop_sac_replay_buffer")
+    model.save_replay_buffer(f"./models/Drop/{ITERATION}/full/drop_sac_replay_buffer")
 
 
 def train_reach_drop(env, eval_env):
