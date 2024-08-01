@@ -1,5 +1,5 @@
 (define (problem hanoi)
-(:domain hanoi)
+(:domain hanoi_parts_3)
 (:objects 
     peg1 - stackable
     peg2 - stackable
@@ -17,6 +17,7 @@
 (smaller cube2 cube1) (smaller cube3 cube1) (smaller cube3 cube2)
 (clear peg2) (clear peg3) (clear cube1)
 (on cube3 peg1) (on cube2 cube3) (on cube1 cube2)
+(free gripper)
 )
 (:goal (and (on cube3 peg3) (on cube2 cube3) (on cube1 cube2)))
 )

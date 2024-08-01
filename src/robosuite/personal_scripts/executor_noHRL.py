@@ -53,6 +53,9 @@ class Executor():
         while not done and not terminated:
             action, _states = model.predict(obs)
             obs, reward, terminated, truncated, info = self.env.step(action)
+            new_state = self.detector.get_groundings(self.env)
+            print(new_state)
+            time.sleep(5)
 
             #addGoal
             obs = addGoal(obs, symgoal, self.env, self.operator)

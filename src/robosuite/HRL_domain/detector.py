@@ -162,8 +162,10 @@ class Detector:
                     groundings[f'over({gripper},{obj})'] = over_value
 
             # Check if the gripper is at the same height as each object
+            combined_objs = self.objects + self.object_areas
             for gripper in ['gripper']:
-                for obj in self.objects:
+                for obj in combined_objs:
+                    print(f"Objects {combined_objs}")
                     at_grab_level_value = self.at_grab_level(gripper, obj, return_distance=return_distance)
                     if return_distance:
                         at_grab_level_value = at_grab_level_value / self.max_distance
