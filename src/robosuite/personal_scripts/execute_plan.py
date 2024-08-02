@@ -21,8 +21,8 @@ def executeAction(base_action, toMove, destination, env):
     #Post condition can be looked at here - toMove should be on destination
     print(f"Reach-pick {toMove} to {destination}")
     # obs = np.concatenate((obs, self.env.sim.data.body_xpos[self.obj_mapping[self.obj_to_pick]][:3]))
-    exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
-    executor = Executor(exec_env, 'reach_pick')
+    
+    executor = Executor(env, 'reach_pick')
     success = executor.execute_policy(symgoal=toMove)
     if not success:
         print("Reach pick failed")
@@ -32,7 +32,7 @@ def executeAction(base_action, toMove, destination, env):
     #Terminated environment, use base env and rewrap?
     print(f"Pick {toMove}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
-    executor = Executor(exec_env, 'pick')
+    executor = Executor(env, 'pick')
     success = executor.execute_policy(symgoal=toMove)
     if not success:
         print("Pick failed")
@@ -41,7 +41,7 @@ def executeAction(base_action, toMove, destination, env):
 
     print(f"Reach-drop {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
-    executor = Executor(exec_env, 'reach_drop')
+    executor = Executor(env, 'reach_drop')
     success = executor.execute_policy(symgoal=[toMove,destination])
     if not success:
         print("Reach drop failed")
@@ -50,7 +50,7 @@ def executeAction(base_action, toMove, destination, env):
 
     print(f"Dropping {destination}")
     # exec_env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
-    executor = Executor(exec_env, 'drop')
+    executor = Executor(env, 'drop')
     success = executor.execute_policy(symgoal=[toMove,destination])
     if not success:
         print("Drop failed")
@@ -74,6 +74,7 @@ if __name__ == "__main__":
     problem_path = pddl_dir + os.sep + problem + ".pddl"
     print("Solving tower of Hanoi task")
     env = create_env("ReachPick")
+    env = GymWrapper(env, keys=['robot0_proprio-state', 'object-state'])
 
     
     plan, game_action_set = call_planner(domain_path, problem_path)

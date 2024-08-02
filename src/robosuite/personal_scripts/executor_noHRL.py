@@ -24,7 +24,10 @@ class Executor():
         done = False
         rew_eps = 0
         step_executor = 0
-        model = SAC.load(executors[self.operator])
+        if self.operator == "drop":
+            model = PPO.load(executors[self.operator])
+        else:
+            model = SAC.load(executors[self.operator])
 
         #Base action
         base_action = np.zeros(len(self.env.action_space.sample()))

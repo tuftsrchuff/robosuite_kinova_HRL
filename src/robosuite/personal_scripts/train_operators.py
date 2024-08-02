@@ -17,7 +17,7 @@ import time
 controller_config = load_controller_config(default_controller='OSC_POSITION')
 
 TRAINING_STEPS = 1000000
-ITERATION = 2
+ITERATION = 4
 
 class BufferCallback(BaseCallback):
     """
@@ -146,6 +146,42 @@ def train_pick(env, eval_env):
     model.save(os.path.join(f'./models/Pick/{ITERATION}/full/pick_sac'))
     model.save_replay_buffer(f"./models/Pick/{ITERATION}/full/pick_sac_replay_buffer")
 
+def train_pick_PPO(env, eval_env):
+    print("Training Pick PPO")
+    #Wrap environment in the wrapper, try to train
+    env = PickWrapper(env)
+    check_env(env)
+    env = Monitor(env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
+
+
+    model = PPO("MlpPolicy", env, verbose=1)
+
+    eval_env = PickWrapper(eval_env)
+    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
+
+    # Define the evaluation callback
+    eval_callback = EvalCallback(
+        eval_env,
+        best_model_save_path=f'./models/PickPPO/{ITERATION}/',
+        log_path='./logs/PickPPO/',
+        eval_freq=10000,
+        n_eval_episodes=10,
+        deterministic=True,
+        render=False,
+        callback_on_new_best=None,
+        verbose=1
+    )
+
+    # Train the model
+    model.learn(
+        total_timesteps=TRAINING_STEPS,
+        callback=eval_callback,
+        progress_bar=True
+    )
+
+    # Save the model
+    model.save(os.path.join(f'./models/PickPPO/{ITERATION}/full/pick_ppo'))
+
 
 
 def train_drop(env, eval_env):
@@ -251,6 +287,43 @@ def train_reach_drop(env, eval_env):
     model.save(os.path.join(f'./models/ReachDrop/{ITERATION}/full/reachdrop_sac'))
     model.save_replay_buffer(f"./models/ReachDrop/{ITERATION}/full/reachdrop_sac_replay_buffer")
 
+def train_drop_ppo(env, eval_env):
+    print("Training Drop PPO")
+    #Wrap environment in the wrapper, try to train
+    env = DropWrapper(env)
+    check_env(env)
+    env = Monitor(env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
+
+
+    model = PPO("MlpPolicy", env, verbose=1)
+
+    eval_env = DropWrapper(eval_env)
+    eval_env = Monitor(eval_env, filename=None, allow_early_resets=True, info_keywords=("is_success",))
+
+    # Define the evaluation callback
+    eval_callback = EvalCallback(
+        eval_env,
+        best_model_save_path=f'./models/DropPPO/{ITERATION}/',
+        log_path='./logs/DropPPO/',
+        eval_freq=10000,
+        n_eval_episodes=10,
+        deterministic=True,
+        render=False,
+        callback_on_new_best=None,
+        verbose=1
+    )
+
+
+    # Train the model
+    model.learn(
+        total_timesteps=TRAINING_STEPS,
+        callback=eval_callback,
+        progress_bar=True
+    )
+
+    # Save the model
+    model.save(os.path.join(f'./models/DropPPO/{ITERATION}/full/drop_ppo'))
+
 def train_all():
     print("Training all")
     # env, eval_env = create_envs()
@@ -299,8 +372,8 @@ if __name__ == "__main__":
     #Learn decomposed tasks for operators
     print("What policy would you like to train?")
     print("\t1. Reach-pick")
-    print("\t2. Pick")
-    print("\t3. Drop")
+    print("\t2. Pick PPO")
+    print("\t3. Drop PPO")
     print("\t4. Reach-drop")
     print("\t5. All")
     policy_train_selection = int(input())
@@ -316,9 +389,9 @@ if __name__ == "__main__":
     if policy_train_selection == 1:
         train_reach_pick(env, eval_env)
     elif policy_train_selection == 2:
-        train_pick(env, eval_env)
+        train_pick_PPO(env, eval_env)
     elif policy_train_selection == 3:
-        train_drop(env, eval_env)
+        train_drop_ppo(env, eval_env)
     elif policy_train_selection == 4:
         train_reach_drop(env, eval_env)
     else:

@@ -2,13 +2,14 @@ import robosuite as suite
 from robosuite.HRL_domain.detector import Detector
 import numpy as np
 from robosuite import load_controller_config
+import time
 
 controller_config = load_controller_config(default_controller='OSC_POSITION')
 
 
 executors = {
      'pick': './models/Pick/best_model.zip',
-     'drop': './models/Drop/1/full/drop_sac.zip',
+     'drop': './models/DropPPO/4/best_model.zip',
      'reach_drop': './models/ReachDrop/1/full/reachdrop_sac.zip',
      'reach_pick': './models/ReachPick/best_model.zip'
 }
@@ -31,6 +32,8 @@ def effects(operator, symgoal):
      elif operator == 'reach_drop':
           return [f'over(gripper,{symgoal[1]})',f'grasped({symgoal[0]})']
      else:
+          print(f"on({symgoal[0]},{symgoal[1]})")
+          time.sleep(5)
           return [f'on({symgoal[0]},{symgoal[1]})',f'grasped({symgoal[0]})']
      
 
